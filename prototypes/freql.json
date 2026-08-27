@@ -1,0 +1,158 @@
+[
+    {
+        "name": "asset_store",
+        "type": "sqlite",
+        "connectionString": "Data Source=C:\\Users\\mclif\\Projects\\dotnet\\CommonResourceFormats\\prototypes\\asset_store.db",
+        "generatorProfiles": [
+            {
+                "name": "records",
+                "outputPath": "C:\\Users\\mclif\\Projects\\dotnet\\CommonResourceFormats\\src\\CommonResourceFormats.AssetStore\\Store\\Persistence.fs",
+                "namespace": "CommonResourceFormats.AssetStore.Store.Persistence",
+                "moduleName": "Records",
+                "includeJsonAttributes": true,
+                "nameSuffix": "Record",
+                "typeReplacements": [
+                    {
+                        "matchValue": "entry_date|created_on|published_on|last_updated|added_on",
+                        "matchType": "regex",
+                        "replacementValue": "DateTime",
+                        "replacementInitValue": "DateTime.UtcNow"
+                    },
+                    {
+                        "matchValue": "active|flag_value",
+                        "matchType": "regex",
+                        "replacementValue": "bool",
+                        "replacementInitValue": "true"
+                    },
+                    {
+                        "matchValue": "schema_version|version$|revision|height|width|^x$|^y$|index$|version_number|part_number|order|max_retry_attempt|^version$",
+                        "matchType": "regex",
+                        "replacementValue": "int",
+                        "replacementInitValue": "0"
+                    }
+                ,
+                    {
+                        "matchValue": "^transform_",
+                        "matchType": "regex",
+                        "replacementValue": "float32",
+                        "replacementInitValue": "0f"
+                    }
+                ],
+                "tableNameReplacements": [
+                    {
+                        "name": "asset_metadata",
+                        "replacementName": "asset_metadata_item"
+                    },
+                    {
+                        "name": "asset_types",
+                        "replacementName": "asset_type"
+                    },
+                    {
+                        "name": "asset_version_metadata",
+                        "replacementName": "asset_version_metadata_item"
+                    },
+                    {
+                        "name": "asset_versions",
+                        "replacementName": "asset_version"
+                    },
+                    {
+                        "name": "assets",
+                        "replacementName": "asset"
+                    },
+                    {
+                        "name": "compression_types",
+                        "replacementName": "compression_type"
+                    },
+                    {
+                        "name": "encryption_types",
+                        "replacementName": "encryption_type"
+                    },
+                    {
+                        "name": "file_types",
+                        "replacementName": "file_type"
+                    },
+                    {
+                        "name": "resource_metadata",
+                        "replacementName": "resource_metadata_item"
+                    },
+                    {
+                        "name": "resources",
+                        "replacementName": "resource"
+                    },
+                    {
+                        "name": "scenes",
+                        "replacementName": "scene"
+                    },
+                    {
+                        "name": "scene_versions",
+                        "replacementName": "scene_version"
+                    },
+                    {
+                        "name": "scene_objects",
+                        "replacementName": "scene_object"
+                    },
+                    {
+                        "name": "asset_version_resources",
+                        "replacementName": "asset_version_resource"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "bitmap_font",
+        "type": "sqlite",
+        "connectionString": "Data Source=C:\\Users\\mclif\\Projects\\dotnet\\Fiket\\prototypes\\bitmap_font.db",
+        "generatorProfiles": [
+            {
+                "name": "records",
+                "outputPath": "C:\\Users\\mclif\\Projects\\dotnet\\Fiket\\src\\Formats\\Fiket.Formats.BitmapFont\\Persistence.fs",
+                "namespace": "Fiket.Formats.BitmapFont.Persistence",
+                "moduleName": "Records",
+                "includeJsonAttributes": true,
+                "nameSuffix": "Record",
+                "typeReplacements": [
+                    {
+                        "matchValue": "entry_date|created_on|published_on|last_updated|added_on",
+                        "matchType": "regex",
+                        "replacementValue": "DateTime",
+                        "replacementInitValue": "DateTime.UtcNow"
+                    },
+                    {
+                        "matchValue": "active|flag_value|^is_",
+                        "matchType": "regex",
+                        "replacementValue": "bool",
+                        "replacementInitValue": "true"
+                    },
+                    {
+                        "matchValue": "offset$|height|width|^x$|^y$|advance$|^page$|^channel$|^char_id$",
+                        "matchType": "regex",
+                        "replacementValue": "int",
+                        "replacementInitValue": "0"
+                    }
+                ,
+                    {
+                        "matchValue": "^transform_",
+                        "matchType": "regex",
+                        "replacementValue": "float32",
+                        "replacementInitValue": "0f"
+                    }
+                ],
+                "tableNameReplacements": [
+                    {
+                        "name": "font_faces",
+                        "replacementName": "font_face"
+                    },
+                    {
+                        "name": "fonts",
+                        "replacementName": "font"
+                    },
+                    {
+                        "name": "glyphs",
+                        "replacementName": "glyph"
+                    }
+                ]
+            }
+        ]
+    }
+]

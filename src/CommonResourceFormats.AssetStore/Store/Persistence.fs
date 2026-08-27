@@ -1,0 +1,2 @@
+﻿module CommonResourceFormats.AssetStore.Store.Persistence
+
