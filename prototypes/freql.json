@@ -19,7 +19,7 @@
                         "replacementInitValue": "DateTime.UtcNow"
                     },
                     {
-                        "matchValue": "active|flag_value",
+                        "matchValue": "active|flag_value|^is_",
                         "matchType": "regex",
                         "replacementValue": "bool",
                         "replacementInitValue": "true"
@@ -29,8 +29,7 @@
                         "matchType": "regex",
                         "replacementValue": "int",
                         "replacementInitValue": "0"
-                    }
-                ,
+                    },
                     {
                         "matchValue": "^transform_",
                         "matchType": "regex",
@@ -94,6 +93,26 @@
                     {
                         "name": "asset_version_resources",
                         "replacementName": "asset_version_resource"
+                    },
+                    {
+                        "name": "scene_object_components",
+                        "replacementName": "scene_object_component"
+                    },
+                    {
+                        "name": "scene_object_component_assets",
+                        "replacementName": "scene_object_component_asset"
+                    },
+                    {
+                        "name": "scene_object_metadata",
+                        "replacementName": "scene_object_metadata_item"
+                    },
+                    {
+                        "name": "scene_object_component_metadata",
+                        "replacementName": "scene_object_component_metadata_item"
+                    },
+                    {
+                        "name": "scene_object_component_asset_metadata",
+                        "replacementName": "scene_object_component_asset_metadata_item"
                     }
                 ]
             }
@@ -129,8 +148,7 @@
                         "matchType": "regex",
                         "replacementValue": "int",
                         "replacementInitValue": "0"
-                    }
-                ,
+                    },
                     {
                         "matchValue": "^transform_",
                         "matchType": "regex",

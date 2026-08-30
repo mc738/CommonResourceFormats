@@ -15,6 +15,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CommonResourceFormats.Scene
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CommonResourceFormats.Test", "src\CommonResourceFormats.Test\CommonResourceFormats.Test.fsproj", "{D7E45601-07EF-486A-BB45-A7CB99C00565}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CommonResourceFormats.GameDataFile", "src\CommonResourceFormats.GameDataFile\CommonResourceFormats.GameDataFile.fsproj", "{EB1E36A5-E75C-49F4-9943-C06C0CF98220}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{D7E45601-07EF-486A-BB45-A7CB99C00565}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7E45601-07EF-486A-BB45-A7CB99C00565}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7E45601-07EF-486A-BB45-A7CB99C00565}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB1E36A5-E75C-49F4-9943-C06C0CF98220}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB1E36A5-E75C-49F4-9943-C06C0CF98220}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB1E36A5-E75C-49F4-9943-C06C0CF98220}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB1E36A5-E75C-49F4-9943-C06C0CF98220}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

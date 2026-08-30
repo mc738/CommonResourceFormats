@@ -6,7 +6,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Core\Domain.fs" />
         <Compile Include="Store\Persistence.fs" />
+        <Compile Include="Store\Impl.fs" />
+        <Compile Include="Operations\Scenes.fs" />
         <Compile Include="Library.fs" />
     </ItemGroup>
 
