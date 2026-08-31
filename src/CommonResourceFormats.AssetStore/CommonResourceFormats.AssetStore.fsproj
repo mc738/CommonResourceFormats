@@ -7,14 +7,24 @@
 
     <ItemGroup>
         <Compile Include="Core\Domain.fs" />
+        <Compile Include="Core\Exceptions.fs" />
         <Compile Include="Store\Persistence.fs" />
         <Compile Include="Store\Impl.fs" />
+        <Compile Include="Operations\Generic.fs" />
+        <Compile Include="Operations\Resources.fs" />
+        <Compile Include="Operations\Assets.fs" />
+        <Compile Include="Operations\Components.fs" />
         <Compile Include="Operations\Scenes.fs" />
-        <Compile Include="Library.fs" />
+        <Compile Include="Operations\Initialization.fs" />
+        <Compile Include="Impl.fs" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Freql.Sqlite" Version="0.13.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\FsToolbox\FsToolbox.GameDevelopment\FsToolbox.GameDevelopment.fsproj" />
     </ItemGroup>
 
 </Project>

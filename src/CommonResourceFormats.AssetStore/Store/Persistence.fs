@@ -30,7 +30,7 @@ module private Utils =
 /// Records representing database bindings for `records`.
 /// </summary>
 /// <remarks>
-/// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+/// This record was generated via Freql.Tools on 31/08/2026 18:08:10
 /// </remarks>
 [<RequireQualifiedAccess>]
 module Records =
@@ -38,7 +38,7 @@ module Records =
     /// A record representing a row in the table `asset_metadata`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type AssetMetadataItem =
         { [<JsonPropertyName("assetId")>] AssetId: string
@@ -91,7 +91,7 @@ module Records =
     /// A record representing a row in the table `asset_types`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type AssetType =
         { [<JsonPropertyName("id")>] Id: string
@@ -142,7 +142,7 @@ module Records =
     /// A record representing a row in the table `asset_version_metadata`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type AssetVersionMetadataItem =
         { [<JsonPropertyName("assetVersionId")>] AssetVersionId: string
@@ -195,7 +195,7 @@ module Records =
     /// A record representing a row in the table `asset_version_resources`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type AssetVersionResource =
         { [<JsonPropertyName("assetVersionId")>] AssetVersionId: string
@@ -246,7 +246,7 @@ module Records =
     /// A record representing a row in the table `asset_versions`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type AssetVersion =
         { [<JsonPropertyName("id")>] Id: string
@@ -313,7 +313,7 @@ module Records =
     /// A record representing a row in the table `assets`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type Asset =
         { [<JsonPropertyName("id")>] Id: string
@@ -365,10 +365,330 @@ module Records =
                   |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
     
     /// <summary>
+    /// A record representing a row in the table `component_asset_metadata`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type ComponentAssetMetadataItem =
+        { [<JsonPropertyName("componentAssetId")>] ComponentAssetId: string
+          [<JsonPropertyName("itemKey")>] ItemKey: string
+          [<JsonPropertyName("itemValue")>] ItemValue: string }
+    
+        static member Blank() =
+            { ComponentAssetId = String.Empty
+              ItemKey = String.Empty
+              ItemValue = String.Empty }
+    
+        static member CreateTableSql() = """
+        CREATE TABLE component_asset_metadata
+(
+    component_asset_id TEXT not null
+        constraint component_asset_metadata_component_assets_id_fk
+            references component_assets,
+    item_key           TEXT not null,
+    item_value         TEXT not null,
+    constraint component_asset_metadata_pk
+        primary key (component_asset_id, item_key)
+)
+        """
+    
+        static member SelectSql() = """
+        SELECT
+              component_asset_metadata.`component_asset_id`,
+              component_asset_metadata.`item_key`,
+              component_asset_metadata.`item_value`
+        FROM component_asset_metadata
+        """
+    
+        static member TableName() = "component_asset_metadata"
+    
+        static member CreateIndexesSql() = []
+    
+        static member CreateTriggersSql() = []
+    
+        static member InitializationSql(checkIfExists: bool) =
+            [ ComponentAssetMetadataItem.CreateTableSql()
+              |> Utils.updateCheckIfExists checkIfExists "TABLE"
+              yield!
+                  ComponentAssetMetadataItem.CreateIndexesSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "INDEX")
+              yield!
+                  ComponentAssetMetadataItem.CreateTriggersSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
+    
+    /// <summary>
+    /// A record representing a row in the table `component_assets`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type ComponentAsset =
+        { [<JsonPropertyName("id")>] Id: string
+          [<JsonPropertyName("componentVersionId")>] ComponentVersionId: string
+          [<JsonPropertyName("assetVersionId")>] AssetVersionId: string }
+    
+        static member Blank() =
+            { Id = String.Empty
+              ComponentVersionId = String.Empty
+              AssetVersionId = String.Empty }
+    
+        static member CreateTableSql() = """
+        CREATE TABLE "component_assets"
+(
+    id                   TEXT not null
+        constraint component_assets_pk
+            primary key,
+    component_version_id TEXT not null
+        constraint component_assets_component_versions_id_fk
+            references component_versions,
+    asset_version_id     TEXT not null
+        constraint component_assets_asset_versions_id_fk
+            references asset_versions
+)
+        """
+    
+        static member SelectSql() = """
+        SELECT
+              component_assets.`id`,
+              component_assets.`component_version_id`,
+              component_assets.`asset_version_id`
+        FROM component_assets
+        """
+    
+        static member TableName() = "component_assets"
+    
+        static member CreateIndexesSql() = []
+    
+        static member CreateTriggersSql() = []
+    
+        static member InitializationSql(checkIfExists: bool) =
+            [ ComponentAsset.CreateTableSql()
+              |> Utils.updateCheckIfExists checkIfExists "TABLE"
+              yield!
+                  ComponentAsset.CreateIndexesSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "INDEX")
+              yield!
+                  ComponentAsset.CreateTriggersSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
+    
+    /// <summary>
+    /// A record representing a row in the table `component_metadata`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type ComponentMetadataItem =
+        { [<JsonPropertyName("componentId")>] ComponentId: string
+          [<JsonPropertyName("itemKey")>] ItemKey: string
+          [<JsonPropertyName("itemValue")>] ItemValue: string }
+    
+        static member Blank() =
+            { ComponentId = String.Empty
+              ItemKey = String.Empty
+              ItemValue = String.Empty }
+    
+        static member CreateTableSql() = """
+        CREATE TABLE component_metadata
+(
+    component_id TEXT not null
+        constraint component_metadata_components_id_fk
+            references components,
+    item_key     TEXT not null,
+    item_value   TEXT not null,
+    constraint component_metadata_pk
+        primary key (component_id, item_key)
+)
+        """
+    
+        static member SelectSql() = """
+        SELECT
+              component_metadata.`component_id`,
+              component_metadata.`item_key`,
+              component_metadata.`item_value`
+        FROM component_metadata
+        """
+    
+        static member TableName() = "component_metadata"
+    
+        static member CreateIndexesSql() = []
+    
+        static member CreateTriggersSql() = []
+    
+        static member InitializationSql(checkIfExists: bool) =
+            [ ComponentMetadataItem.CreateTableSql()
+              |> Utils.updateCheckIfExists checkIfExists "TABLE"
+              yield!
+                  ComponentMetadataItem.CreateIndexesSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "INDEX")
+              yield!
+                  ComponentMetadataItem.CreateTriggersSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
+    
+    /// <summary>
+    /// A record representing a row in the table `component_version_metadata`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type ComponentVersionMetadataItem =
+        { [<JsonPropertyName("componentVersionId")>] ComponentVersionId: string
+          [<JsonPropertyName("itemKey")>] ItemKey: string
+          [<JsonPropertyName("itemValue")>] ItemValue: string }
+    
+        static member Blank() =
+            { ComponentVersionId = String.Empty
+              ItemKey = String.Empty
+              ItemValue = String.Empty }
+    
+        static member CreateTableSql() = """
+        CREATE TABLE component_version_metadata
+(
+    component_version_id TEXT not null
+        constraint component_version_metadata_component_versions_id_fk
+            references component_versions,
+    item_key             TEXT not null,
+    item_value           TEXT not null,
+    constraint component_version_metadata_pk
+        primary key (component_version_id, item_key)
+)
+        """
+    
+        static member SelectSql() = """
+        SELECT
+              component_version_metadata.`component_version_id`,
+              component_version_metadata.`item_key`,
+              component_version_metadata.`item_value`
+        FROM component_version_metadata
+        """
+    
+        static member TableName() = "component_version_metadata"
+    
+        static member CreateIndexesSql() = []
+    
+        static member CreateTriggersSql() = []
+    
+        static member InitializationSql(checkIfExists: bool) =
+            [ ComponentVersionMetadataItem.CreateTableSql()
+              |> Utils.updateCheckIfExists checkIfExists "TABLE"
+              yield!
+                  ComponentVersionMetadataItem.CreateIndexesSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "INDEX")
+              yield!
+                  ComponentVersionMetadataItem.CreateTriggersSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
+    
+    /// <summary>
+    /// A record representing a row in the table `component_versions`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type ComponentVersion =
+        { [<JsonPropertyName("id")>] Id: string
+          [<JsonPropertyName("componentId")>] ComponentId: string
+          [<JsonPropertyName("version")>] Version: int
+          [<JsonPropertyName("componentData")>] ComponentData: string }
+    
+        static member Blank() =
+            { Id = String.Empty
+              ComponentId = String.Empty
+              Version = 0
+              ComponentData = String.Empty }
+    
+        static member CreateTableSql() = """
+        CREATE TABLE "component_versions"
+(
+    id             TEXT    not null
+        constraint component_versions_pk
+            primary key,
+    component_id   TEXT    not null
+        constraint component_versions_components_id_fk
+            references components,
+    version        integer not null,
+    component_data TEXT    not null,
+    constraint component_versions_pk_2
+        unique (component_id, version)
+)
+        """
+    
+        static member SelectSql() = """
+        SELECT
+              component_versions.`id`,
+              component_versions.`component_id`,
+              component_versions.`version`,
+              component_versions.`component_data`
+        FROM component_versions
+        """
+    
+        static member TableName() = "component_versions"
+    
+        static member CreateIndexesSql() = []
+    
+        static member CreateTriggersSql() = []
+    
+        static member InitializationSql(checkIfExists: bool) =
+            [ ComponentVersion.CreateTableSql()
+              |> Utils.updateCheckIfExists checkIfExists "TABLE"
+              yield!
+                  ComponentVersion.CreateIndexesSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "INDEX")
+              yield!
+                  ComponentVersion.CreateTriggersSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
+    
+    /// <summary>
+    /// A record representing a row in the table `components`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type Component =
+        { [<JsonPropertyName("id")>] Id: string
+          [<JsonPropertyName("componentType")>] ComponentType: string }
+    
+        static member Blank() =
+            { Id = String.Empty
+              ComponentType = String.Empty }
+    
+        static member CreateTableSql() = """
+        CREATE TABLE "components"
+(
+    id             TEXT not null
+        constraint components_pk
+            primary key,
+    component_type TEXT not null
+)
+        """
+    
+        static member SelectSql() = """
+        SELECT
+              components.`id`,
+              components.`component_type`
+        FROM components
+        """
+    
+        static member TableName() = "components"
+    
+        static member CreateIndexesSql() = []
+    
+        static member CreateTriggersSql() = []
+    
+        static member InitializationSql(checkIfExists: bool) =
+            [ Component.CreateTableSql()
+              |> Utils.updateCheckIfExists checkIfExists "TABLE"
+              yield!
+                  Component.CreateIndexesSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "INDEX")
+              yield!
+                  Component.CreateTriggersSql()
+                  |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
+    
+    /// <summary>
     /// A record representing a row in the table `compression_types`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type CompressionType =
         { [<JsonPropertyName("id")>] Id: string
@@ -415,7 +735,7 @@ module Records =
     /// A record representing a row in the table `encryption_types`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type EncryptionType =
         { [<JsonPropertyName("id")>] Id: string
@@ -462,7 +782,7 @@ module Records =
     /// A record representing a row in the table `file_types`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type FileType =
         { [<JsonPropertyName("id")>] Id: string
@@ -511,7 +831,7 @@ module Records =
     /// A record representing a row in the table `resource_metadata`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type ResourceMetadataItem =
         { [<JsonPropertyName("resourceId")>] ResourceId: string
@@ -564,7 +884,7 @@ module Records =
     /// A record representing a row in the table `resources`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type Resource =
         { [<JsonPropertyName("id")>] Id: string
@@ -638,118 +958,10 @@ module Records =
                   |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
     
     /// <summary>
-    /// A record representing a row in the table `scene_object_component_asset_metadata`.
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    type SceneObjectComponentAssetMetadataItem =
-        { [<JsonPropertyName("sceneObjectComponentAssetId")>] SceneObjectComponentAssetId: string
-          [<JsonPropertyName("itemKey")>] ItemKey: string
-          [<JsonPropertyName("itemValue")>] ItemValue: string }
-    
-        static member Blank() =
-            { SceneObjectComponentAssetId = String.Empty
-              ItemKey = String.Empty
-              ItemValue = String.Empty }
-    
-        static member CreateTableSql() = """
-        CREATE TABLE scene_object_component_asset_metadata
-(
-    scene_object_component_asset_id TEXT not null
-        constraint scene_object_component_asset_metadata_scene_object_component_assets_id_fk
-            references scene_object_component_assets,
-    item_key                        TEXT not null,
-    item_value                      TEXT not null,
-    constraint scene_object_component_asset_metadata_pk
-        primary key (scene_object_component_asset_id, item_key)
-)
-        """
-    
-        static member SelectSql() = """
-        SELECT
-              scene_object_component_asset_metadata.`scene_object_component_asset_id`,
-              scene_object_component_asset_metadata.`item_key`,
-              scene_object_component_asset_metadata.`item_value`
-        FROM scene_object_component_asset_metadata
-        """
-    
-        static member TableName() = "scene_object_component_asset_metadata"
-    
-        static member CreateIndexesSql() = []
-    
-        static member CreateTriggersSql() = []
-    
-        static member InitializationSql(checkIfExists: bool) =
-            [ SceneObjectComponentAssetMetadataItem.CreateTableSql()
-              |> Utils.updateCheckIfExists checkIfExists "TABLE"
-              yield!
-                  SceneObjectComponentAssetMetadataItem.CreateIndexesSql()
-                  |> List.map (Utils.updateCheckIfExists checkIfExists "INDEX")
-              yield!
-                  SceneObjectComponentAssetMetadataItem.CreateTriggersSql()
-                  |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
-    
-    /// <summary>
-    /// A record representing a row in the table `scene_object_component_assets`.
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    type SceneObjectComponentAsset =
-        { [<JsonPropertyName("id")>] Id: string
-          [<JsonPropertyName("sceneObjectComponentId")>] SceneObjectComponentId: string
-          [<JsonPropertyName("assetVersionId")>] AssetVersionId: string }
-    
-        static member Blank() =
-            { Id = String.Empty
-              SceneObjectComponentId = String.Empty
-              AssetVersionId = String.Empty }
-    
-        static member CreateTableSql() = """
-        CREATE TABLE "scene_object_component_assets"
-(
-    id                        TEXT not null
-        constraint scene_object_component_assets_pk
-            primary key,
-    scene_object_component_id TEXT not null
-        constraint scene_object_component_asset_scene_object_component_id_fk
-            references scene_object_components,
-    asset_version_id          TEXT not null
-        constraint scene_object_component_asset_asset_versions_id_fk
-            references asset_versions
-)
-        """
-    
-        static member SelectSql() = """
-        SELECT
-              scene_object_component_assets.`id`,
-              scene_object_component_assets.`scene_object_component_id`,
-              scene_object_component_assets.`asset_version_id`
-        FROM scene_object_component_assets
-        """
-    
-        static member TableName() = "scene_object_component_assets"
-    
-        static member CreateIndexesSql() = []
-    
-        static member CreateTriggersSql() = []
-    
-        static member InitializationSql(checkIfExists: bool) =
-            [ SceneObjectComponentAsset.CreateTableSql()
-              |> Utils.updateCheckIfExists checkIfExists "TABLE"
-              yield!
-                  SceneObjectComponentAsset.CreateIndexesSql()
-                  |> List.map (Utils.updateCheckIfExists checkIfExists "INDEX")
-              yield!
-                  SceneObjectComponentAsset.CreateTriggersSql()
-                  |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
-    
-    /// <summary>
     /// A record representing a row in the table `scene_object_component_metadata`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type SceneObjectComponentMetadataItem =
         { [<JsonPropertyName("sceneObjectComponentId")>] SceneObjectComponentId: string
@@ -802,40 +1014,41 @@ module Records =
     /// A record representing a row in the table `scene_object_components`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type SceneObjectComponent =
         { [<JsonPropertyName("id")>] Id: string
           [<JsonPropertyName("sceneObjectId")>] SceneObjectId: string
-          [<JsonPropertyName("componentType")>] ComponentType: string
-          [<JsonPropertyName("componentData")>] ComponentData: string }
+          [<JsonPropertyName("componentVersionId")>] ComponentVersionId: string
+          [<JsonPropertyName("overrideComponentData")>] OverrideComponentData: string option }
     
         static member Blank() =
             { Id = String.Empty
               SceneObjectId = String.Empty
-              ComponentType = String.Empty
-              ComponentData = String.Empty }
+              ComponentVersionId = String.Empty
+              OverrideComponentData = None }
     
         static member CreateTableSql() = """
         CREATE TABLE scene_object_components
 (
-    id              TEXT not null
+    id                   TEXT not null
         constraint scene_object_components_pk
             primary key,
-    scene_object_id TEXT not null
+    scene_object_id      TEXT not null
         constraint scene_object_components_scene_objects_id_fk
             references scene_objects,
-    component_type  TEXT not null,
-    component_data  TEXT not null
-)
+    component_version_id TEXT not null
+        constraint scene_object_components_component_versions_id_fk
+            references component_versions
+, override_component_data TEXT)
         """
     
         static member SelectSql() = """
         SELECT
               scene_object_components.`id`,
               scene_object_components.`scene_object_id`,
-              scene_object_components.`component_type`,
-              scene_object_components.`component_data`
+              scene_object_components.`component_version_id`,
+              scene_object_components.`override_component_data`
         FROM scene_object_components
         """
     
@@ -859,9 +1072,9 @@ module Records =
     /// A record representing a row in the table `scene_object_metadata`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
-    type SceneObjectMetadataItem =
+    type SceneObjectMetadata =
         { [<JsonPropertyName("sceneObjectId")>] SceneObjectId: string
           [<JsonPropertyName("itemKey")>] ItemKey: string
           [<JsonPropertyName("itemValue")>] ItemValue: string }
@@ -899,20 +1112,20 @@ module Records =
         static member CreateTriggersSql() = []
     
         static member InitializationSql(checkIfExists: bool) =
-            [ SceneObjectMetadataItem.CreateTableSql()
+            [ SceneObjectMetadata.CreateTableSql()
               |> Utils.updateCheckIfExists checkIfExists "TABLE"
               yield!
-                  SceneObjectMetadataItem.CreateIndexesSql()
+                  SceneObjectMetadata.CreateIndexesSql()
                   |> List.map (Utils.updateCheckIfExists checkIfExists "INDEX")
               yield!
-                  SceneObjectMetadataItem.CreateTriggersSql()
+                  SceneObjectMetadata.CreateTriggersSql()
                   |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
     
     /// <summary>
     /// A record representing a row in the table `scene_objects`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type SceneObject =
         { [<JsonPropertyName("id")>] Id: string
@@ -925,9 +1138,10 @@ module Records =
           [<JsonPropertyName("transformRotationY")>] TransformRotationY: float32
           [<JsonPropertyName("transformRotationZ")>] TransformRotationZ: float32
           [<JsonPropertyName("transformRotationW")>] TransformRotationW: float32
-          [<JsonPropertyName("transformScaleX")>] TransformScaleX: float32 option
+          [<JsonPropertyName("transformScaleX")>] TransformScaleX: float32
           [<JsonPropertyName("transformScaleY")>] TransformScaleY: float32
-          [<JsonPropertyName("transformScaleZ")>] TransformScaleZ: float32 }
+          [<JsonPropertyName("transformScaleZ")>] TransformScaleZ: float32
+          [<JsonPropertyName("name")>] Name: string }
     
         static member Blank() =
             { Id = String.Empty
@@ -940,9 +1154,10 @@ module Records =
               TransformRotationY = 0f
               TransformRotationZ = 0f
               TransformRotationW = 0f
-              TransformScaleX = None
+              TransformScaleX = 0f
               TransformScaleY = 0f
-              TransformScaleZ = 0f }
+              TransformScaleZ = 0f
+              Name = String.Empty }
     
         static member CreateTableSql() = """
         CREATE TABLE "scene_objects"
@@ -963,10 +1178,10 @@ module Records =
     transform_rotation_y REAL not null,
     transform_rotation_z real not null,
     transform_rotation_w real not null,
-    transform_scale_x    REAL,
+    transform_scale_x    REAL not null,
     transform_scale_y    REAL not null,
     transform_scale_z    REAL not null
-)
+, name TEXT not null)
         """
     
         static member SelectSql() = """
@@ -983,7 +1198,8 @@ module Records =
               scene_objects.`transform_rotation_w`,
               scene_objects.`transform_scale_x`,
               scene_objects.`transform_scale_y`,
-              scene_objects.`transform_scale_z`
+              scene_objects.`transform_scale_z`,
+              scene_objects.`name`
         FROM scene_objects
         """
     
@@ -1007,7 +1223,7 @@ module Records =
     /// A record representing a row in the table `scene_versions`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type SceneVersion =
         { [<JsonPropertyName("id")>] Id: string
@@ -1062,7 +1278,7 @@ module Records =
     /// A record representing a row in the table `scenes`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type Scene =
         { [<JsonPropertyName("id")>] Id: string
@@ -1106,7 +1322,7 @@ module Records =
                   |> List.map (Utils.updateCheckIfExists checkIfExists "TRIGGER")  ]
     
 /// <remarks>
-/// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+/// This record was generated via Freql.Tools on 31/08/2026 18:08:10
 /// </remarks>
 [<RequireQualifiedAccess>]
 module Parameters =
@@ -1114,7 +1330,7 @@ module Parameters =
     /// A record representing a new row in the table `asset_metadata`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewAssetMetadataItem =
         { [<JsonPropertyName("assetId")>] AssetId: string
@@ -1130,7 +1346,7 @@ module Parameters =
     /// A record representing a new row in the table `asset_types`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewAssetType =
         { [<JsonPropertyName("id")>] Id: string
@@ -1146,7 +1362,7 @@ module Parameters =
     /// A record representing a new row in the table `asset_version_metadata`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewAssetVersionMetadataItem =
         { [<JsonPropertyName("assetVersionId")>] AssetVersionId: string
@@ -1162,7 +1378,7 @@ module Parameters =
     /// A record representing a new row in the table `asset_version_resources`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewAssetVersionResource =
         { [<JsonPropertyName("assetVersionId")>] AssetVersionId: string
@@ -1176,7 +1392,7 @@ module Parameters =
     /// A record representing a new row in the table `asset_versions`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewAssetVersion =
         { [<JsonPropertyName("id")>] Id: string
@@ -1198,7 +1414,7 @@ module Parameters =
     /// A record representing a new row in the table `assets`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewAsset =
         { [<JsonPropertyName("id")>] Id: string
@@ -1213,10 +1429,106 @@ module Parameters =
               CreatedOn = DateTime.UtcNow }
     
     /// <summary>
+    /// A record representing a new row in the table `component_asset_metadata`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type NewComponentAssetMetadataItem =
+        { [<JsonPropertyName("componentAssetId")>] ComponentAssetId: string
+          [<JsonPropertyName("itemKey")>] ItemKey: string
+          [<JsonPropertyName("itemValue")>] ItemValue: string }
+    
+        static member Blank() =
+            { ComponentAssetId = String.Empty
+              ItemKey = String.Empty
+              ItemValue = String.Empty }
+    
+    /// <summary>
+    /// A record representing a new row in the table `component_assets`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type NewComponentAsset =
+        { [<JsonPropertyName("id")>] Id: string
+          [<JsonPropertyName("componentVersionId")>] ComponentVersionId: string
+          [<JsonPropertyName("assetVersionId")>] AssetVersionId: string }
+    
+        static member Blank() =
+            { Id = String.Empty
+              ComponentVersionId = String.Empty
+              AssetVersionId = String.Empty }
+    
+    /// <summary>
+    /// A record representing a new row in the table `component_metadata`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type NewComponentMetadataItem =
+        { [<JsonPropertyName("componentId")>] ComponentId: string
+          [<JsonPropertyName("itemKey")>] ItemKey: string
+          [<JsonPropertyName("itemValue")>] ItemValue: string }
+    
+        static member Blank() =
+            { ComponentId = String.Empty
+              ItemKey = String.Empty
+              ItemValue = String.Empty }
+    
+    /// <summary>
+    /// A record representing a new row in the table `component_version_metadata`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type NewComponentVersionMetadataItem =
+        { [<JsonPropertyName("componentVersionId")>] ComponentVersionId: string
+          [<JsonPropertyName("itemKey")>] ItemKey: string
+          [<JsonPropertyName("itemValue")>] ItemValue: string }
+    
+        static member Blank() =
+            { ComponentVersionId = String.Empty
+              ItemKey = String.Empty
+              ItemValue = String.Empty }
+    
+    /// <summary>
+    /// A record representing a new row in the table `component_versions`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type NewComponentVersion =
+        { [<JsonPropertyName("id")>] Id: string
+          [<JsonPropertyName("componentId")>] ComponentId: string
+          [<JsonPropertyName("version")>] Version: int
+          [<JsonPropertyName("componentData")>] ComponentData: string }
+    
+        static member Blank() =
+            { Id = String.Empty
+              ComponentId = String.Empty
+              Version = 0
+              ComponentData = String.Empty }
+    
+    /// <summary>
+    /// A record representing a new row in the table `components`.
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    type NewComponent =
+        { [<JsonPropertyName("id")>] Id: string
+          [<JsonPropertyName("componentType")>] ComponentType: string }
+    
+        static member Blank() =
+            { Id = String.Empty
+              ComponentType = String.Empty }
+    
+    /// <summary>
     /// A record representing a new row in the table `compression_types`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewCompressionType =
         { [<JsonPropertyName("id")>] Id: string
@@ -1230,7 +1542,7 @@ module Parameters =
     /// A record representing a new row in the table `encryption_types`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewEncryptionType =
         { [<JsonPropertyName("id")>] Id: string
@@ -1244,7 +1556,7 @@ module Parameters =
     /// A record representing a new row in the table `file_types`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewFileType =
         { [<JsonPropertyName("id")>] Id: string
@@ -1260,7 +1572,7 @@ module Parameters =
     /// A record representing a new row in the table `resource_metadata`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewResourceMetadataItem =
         { [<JsonPropertyName("resourceId")>] ResourceId: string
@@ -1276,7 +1588,7 @@ module Parameters =
     /// A record representing a new row in the table `resources`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewResource =
         { [<JsonPropertyName("id")>] Id: string
@@ -1301,42 +1613,10 @@ module Parameters =
               CreatedOn = DateTime.UtcNow }
     
     /// <summary>
-    /// A record representing a new row in the table `scene_object_component_asset_metadata`.
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    type NewSceneObjectComponentAssetMetadataItem =
-        { [<JsonPropertyName("sceneObjectComponentAssetId")>] SceneObjectComponentAssetId: string
-          [<JsonPropertyName("itemKey")>] ItemKey: string
-          [<JsonPropertyName("itemValue")>] ItemValue: string }
-    
-        static member Blank() =
-            { SceneObjectComponentAssetId = String.Empty
-              ItemKey = String.Empty
-              ItemValue = String.Empty }
-    
-    /// <summary>
-    /// A record representing a new row in the table `scene_object_component_assets`.
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    type NewSceneObjectComponentAsset =
-        { [<JsonPropertyName("id")>] Id: string
-          [<JsonPropertyName("sceneObjectComponentId")>] SceneObjectComponentId: string
-          [<JsonPropertyName("assetVersionId")>] AssetVersionId: string }
-    
-        static member Blank() =
-            { Id = String.Empty
-              SceneObjectComponentId = String.Empty
-              AssetVersionId = String.Empty }
-    
-    /// <summary>
     /// A record representing a new row in the table `scene_object_component_metadata`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewSceneObjectComponentMetadataItem =
         { [<JsonPropertyName("sceneObjectComponentId")>] SceneObjectComponentId: string
@@ -1352,27 +1632,27 @@ module Parameters =
     /// A record representing a new row in the table `scene_object_components`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewSceneObjectComponent =
         { [<JsonPropertyName("id")>] Id: string
           [<JsonPropertyName("sceneObjectId")>] SceneObjectId: string
-          [<JsonPropertyName("componentType")>] ComponentType: string
-          [<JsonPropertyName("componentData")>] ComponentData: string }
+          [<JsonPropertyName("componentVersionId")>] ComponentVersionId: string
+          [<JsonPropertyName("overrideComponentData")>] OverrideComponentData: string option }
     
         static member Blank() =
             { Id = String.Empty
               SceneObjectId = String.Empty
-              ComponentType = String.Empty
-              ComponentData = String.Empty }
+              ComponentVersionId = String.Empty
+              OverrideComponentData = None }
     
     /// <summary>
     /// A record representing a new row in the table `scene_object_metadata`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
-    type NewSceneObjectMetadataItem =
+    type NewSceneObjectMetadata =
         { [<JsonPropertyName("sceneObjectId")>] SceneObjectId: string
           [<JsonPropertyName("itemKey")>] ItemKey: string
           [<JsonPropertyName("itemValue")>] ItemValue: string }
@@ -1386,7 +1666,7 @@ module Parameters =
     /// A record representing a new row in the table `scene_objects`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewSceneObject =
         { [<JsonPropertyName("id")>] Id: string
@@ -1399,9 +1679,10 @@ module Parameters =
           [<JsonPropertyName("transformRotationY")>] TransformRotationY: float32
           [<JsonPropertyName("transformRotationZ")>] TransformRotationZ: float32
           [<JsonPropertyName("transformRotationW")>] TransformRotationW: float32
-          [<JsonPropertyName("transformScaleX")>] TransformScaleX: float32 option
+          [<JsonPropertyName("transformScaleX")>] TransformScaleX: float32
           [<JsonPropertyName("transformScaleY")>] TransformScaleY: float32
-          [<JsonPropertyName("transformScaleZ")>] TransformScaleZ: float32 }
+          [<JsonPropertyName("transformScaleZ")>] TransformScaleZ: float32
+          [<JsonPropertyName("name")>] Name: string }
     
         static member Blank() =
             { Id = String.Empty
@@ -1414,15 +1695,16 @@ module Parameters =
               TransformRotationY = 0f
               TransformRotationZ = 0f
               TransformRotationW = 0f
-              TransformScaleX = None
+              TransformScaleX = 0f
               TransformScaleY = 0f
-              TransformScaleZ = 0f }
+              TransformScaleZ = 0f
+              Name = String.Empty }
     
     /// <summary>
     /// A record representing a new row in the table `scene_versions`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewSceneVersion =
         { [<JsonPropertyName("id")>] Id: string
@@ -1438,7 +1720,7 @@ module Parameters =
     /// A record representing a new row in the table `scenes`.
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     type NewScene =
         { [<JsonPropertyName("id")>] Id: string
@@ -1449,7 +1731,7 @@ module Parameters =
               Name = String.Empty }
     
 /// <remarks>
-/// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+/// This record was generated via Freql.Tools on 31/08/2026 18:08:10
 /// </remarks>
 [<RequireQualifiedAccess>]
 module Operations =
@@ -1465,7 +1747,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1484,7 +1766,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1503,7 +1785,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1522,7 +1804,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1548,7 +1830,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1567,7 +1849,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1586,7 +1868,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1605,7 +1887,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1631,7 +1913,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1650,7 +1932,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1669,7 +1951,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1688,7 +1970,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1714,7 +1996,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1733,7 +2015,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1752,7 +2034,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1771,7 +2053,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1797,7 +2079,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1816,7 +2098,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1835,7 +2117,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1854,7 +2136,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1880,7 +2162,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1899,7 +2181,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1918,7 +2200,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1937,7 +2219,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1955,6 +2237,504 @@ module Operations =
         context.TryInsert("assets", parameters)
     
     /// <summary>
+    /// Select a `Records.ComponentAssetMetadataItem` from the table `component_asset_metadata`.
+    /// Internally this calls `context.SelectSingleAnon&lt;Records.ComponentAssetMetadataItem&gt;` and uses Records.ComponentAssetMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentAssetMetadataItemRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentAssetMetadataItemRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentAssetMetadataItem.SelectSql() ] @ query |> buildSql
+        context.SelectSingleAnon<Records.ComponentAssetMetadataItem>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.SelectAnon&lt;Records.ComponentAssetMetadataItem&gt;` and uses Records.ComponentAssetMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentAssetMetadataItemRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentAssetMetadataItemRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentAssetMetadataItem.SelectSql() ] @ query |> buildSql
+        context.SelectAnon<Records.ComponentAssetMetadataItem>(sql, parameters)
+    /// <summary>
+    /// Select a `Records.ComponentAssetMetadataItem` from the table `component_asset_metadata`.
+    /// Internally this calls `context.TrySelectSingleAnon&lt;Records.ComponentAssetMetadataItem&gt;` and uses Records.ComponentAssetMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentAssetMetadataItemRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentAssetMetadataItemRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentAssetMetadataItem.SelectSql() ] @ query |> buildSql
+        context.TrySelectSingleAnon<Records.ComponentAssetMetadataItem>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.TrySelectAnon&lt;Records.ComponentAssetMetadataItem&gt;` and uses Records.ComponentAssetMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentAssetMetadataItemRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentAssetMetadataItemRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentAssetMetadataItem.SelectSql() ] @ query |> buildSql
+        context.TrySelectAnon<Records.ComponentAssetMetadataItem>(sql, parameters)
+    
+    let insertComponentAssetMetadataItem (context: SqliteContext) (parameters: Parameters.NewComponentAssetMetadataItem) =
+        context.Insert("component_asset_metadata", parameters)
+    
+    let tryInsertComponentAssetMetadataItem (context: SqliteContext) (parameters: Parameters.NewComponentAssetMetadataItem) =
+        context.TryInsert("component_asset_metadata", parameters)
+    
+    /// <summary>
+    /// Select a `Records.ComponentAsset` from the table `component_assets`.
+    /// Internally this calls `context.SelectSingleAnon&lt;Records.ComponentAsset&gt;` and uses Records.ComponentAsset.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentAssetRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentAssetRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentAsset.SelectSql() ] @ query |> buildSql
+        context.SelectSingleAnon<Records.ComponentAsset>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.SelectAnon&lt;Records.ComponentAsset&gt;` and uses Records.ComponentAsset.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentAssetRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentAssetRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentAsset.SelectSql() ] @ query |> buildSql
+        context.SelectAnon<Records.ComponentAsset>(sql, parameters)
+    /// <summary>
+    /// Select a `Records.ComponentAsset` from the table `component_assets`.
+    /// Internally this calls `context.TrySelectSingleAnon&lt;Records.ComponentAsset&gt;` and uses Records.ComponentAsset.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentAssetRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentAssetRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentAsset.SelectSql() ] @ query |> buildSql
+        context.TrySelectSingleAnon<Records.ComponentAsset>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.TrySelectAnon&lt;Records.ComponentAsset&gt;` and uses Records.ComponentAsset.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentAssetRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentAssetRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentAsset.SelectSql() ] @ query |> buildSql
+        context.TrySelectAnon<Records.ComponentAsset>(sql, parameters)
+    
+    let insertComponentAsset (context: SqliteContext) (parameters: Parameters.NewComponentAsset) =
+        context.Insert("component_assets", parameters)
+    
+    let tryInsertComponentAsset (context: SqliteContext) (parameters: Parameters.NewComponentAsset) =
+        context.TryInsert("component_assets", parameters)
+    
+    /// <summary>
+    /// Select a `Records.ComponentMetadataItem` from the table `component_metadata`.
+    /// Internally this calls `context.SelectSingleAnon&lt;Records.ComponentMetadataItem&gt;` and uses Records.ComponentMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentMetadataItemRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentMetadataItemRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentMetadataItem.SelectSql() ] @ query |> buildSql
+        context.SelectSingleAnon<Records.ComponentMetadataItem>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.SelectAnon&lt;Records.ComponentMetadataItem&gt;` and uses Records.ComponentMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentMetadataItemRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentMetadataItemRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentMetadataItem.SelectSql() ] @ query |> buildSql
+        context.SelectAnon<Records.ComponentMetadataItem>(sql, parameters)
+    /// <summary>
+    /// Select a `Records.ComponentMetadataItem` from the table `component_metadata`.
+    /// Internally this calls `context.TrySelectSingleAnon&lt;Records.ComponentMetadataItem&gt;` and uses Records.ComponentMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentMetadataItemRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentMetadataItemRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentMetadataItem.SelectSql() ] @ query |> buildSql
+        context.TrySelectSingleAnon<Records.ComponentMetadataItem>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.TrySelectAnon&lt;Records.ComponentMetadataItem&gt;` and uses Records.ComponentMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentMetadataItemRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentMetadataItemRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentMetadataItem.SelectSql() ] @ query |> buildSql
+        context.TrySelectAnon<Records.ComponentMetadataItem>(sql, parameters)
+    
+    let insertComponentMetadataItem (context: SqliteContext) (parameters: Parameters.NewComponentMetadataItem) =
+        context.Insert("component_metadata", parameters)
+    
+    let tryInsertComponentMetadataItem (context: SqliteContext) (parameters: Parameters.NewComponentMetadataItem) =
+        context.TryInsert("component_metadata", parameters)
+    
+    /// <summary>
+    /// Select a `Records.ComponentVersionMetadataItem` from the table `component_version_metadata`.
+    /// Internally this calls `context.SelectSingleAnon&lt;Records.ComponentVersionMetadataItem&gt;` and uses Records.ComponentVersionMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentVersionMetadataItemRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentVersionMetadataItemRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentVersionMetadataItem.SelectSql() ] @ query |> buildSql
+        context.SelectSingleAnon<Records.ComponentVersionMetadataItem>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.SelectAnon&lt;Records.ComponentVersionMetadataItem&gt;` and uses Records.ComponentVersionMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentVersionMetadataItemRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentVersionMetadataItemRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentVersionMetadataItem.SelectSql() ] @ query |> buildSql
+        context.SelectAnon<Records.ComponentVersionMetadataItem>(sql, parameters)
+    /// <summary>
+    /// Select a `Records.ComponentVersionMetadataItem` from the table `component_version_metadata`.
+    /// Internally this calls `context.TrySelectSingleAnon&lt;Records.ComponentVersionMetadataItem&gt;` and uses Records.ComponentVersionMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentVersionMetadataItemRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentVersionMetadataItemRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentVersionMetadataItem.SelectSql() ] @ query |> buildSql
+        context.TrySelectSingleAnon<Records.ComponentVersionMetadataItem>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.TrySelectAnon&lt;Records.ComponentVersionMetadataItem&gt;` and uses Records.ComponentVersionMetadataItem.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentVersionMetadataItemRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentVersionMetadataItemRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentVersionMetadataItem.SelectSql() ] @ query |> buildSql
+        context.TrySelectAnon<Records.ComponentVersionMetadataItem>(sql, parameters)
+    
+    let insertComponentVersionMetadataItem (context: SqliteContext) (parameters: Parameters.NewComponentVersionMetadataItem) =
+        context.Insert("component_version_metadata", parameters)
+    
+    let tryInsertComponentVersionMetadataItem (context: SqliteContext) (parameters: Parameters.NewComponentVersionMetadataItem) =
+        context.TryInsert("component_version_metadata", parameters)
+    
+    /// <summary>
+    /// Select a `Records.ComponentVersion` from the table `component_versions`.
+    /// Internally this calls `context.SelectSingleAnon&lt;Records.ComponentVersion&gt;` and uses Records.ComponentVersion.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentVersionRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentVersionRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentVersion.SelectSql() ] @ query |> buildSql
+        context.SelectSingleAnon<Records.ComponentVersion>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.SelectAnon&lt;Records.ComponentVersion&gt;` and uses Records.ComponentVersion.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentVersionRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentVersionRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentVersion.SelectSql() ] @ query |> buildSql
+        context.SelectAnon<Records.ComponentVersion>(sql, parameters)
+    /// <summary>
+    /// Select a `Records.ComponentVersion` from the table `component_versions`.
+    /// Internally this calls `context.TrySelectSingleAnon&lt;Records.ComponentVersion&gt;` and uses Records.ComponentVersion.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentVersionRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentVersionRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentVersion.SelectSql() ] @ query |> buildSql
+        context.TrySelectSingleAnon<Records.ComponentVersion>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.TrySelectAnon&lt;Records.ComponentVersion&gt;` and uses Records.ComponentVersion.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentVersionRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentVersionRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.ComponentVersion.SelectSql() ] @ query |> buildSql
+        context.TrySelectAnon<Records.ComponentVersion>(sql, parameters)
+    
+    let insertComponentVersion (context: SqliteContext) (parameters: Parameters.NewComponentVersion) =
+        context.Insert("component_versions", parameters)
+    
+    let tryInsertComponentVersion (context: SqliteContext) (parameters: Parameters.NewComponentVersion) =
+        context.TryInsert("component_versions", parameters)
+    
+    /// <summary>
+    /// Select a `Records.Component` from the table `components`.
+    /// Internally this calls `context.SelectSingleAnon&lt;Records.Component&gt;` and uses Records.Component.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.Component.SelectSql() ] @ query |> buildSql
+        context.SelectSingleAnon<Records.Component>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.SelectAnon&lt;Records.Component&gt;` and uses Records.Component.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = selectComponentRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let selectComponentRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.Component.SelectSql() ] @ query |> buildSql
+        context.SelectAnon<Records.Component>(sql, parameters)
+    /// <summary>
+    /// Select a `Records.Component` from the table `components`.
+    /// Internally this calls `context.TrySelectSingleAnon&lt;Records.Component&gt;` and uses Records.Component.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.Component.SelectSql() ] @ query |> buildSql
+        context.TrySelectSingleAnon<Records.Component>(sql, parameters)
+    
+    /// <summary>
+    /// Internally this calls `context.TrySelectAnon&lt;Records.Component&gt;` and uses Records.Component.SelectSql().
+    /// The caller can provide extra string lines to create a query and boxed parameters.
+    /// It is up to the caller to verify the sql and parameters are correct,
+    /// this should be considered an internal function (not exposed in public APIs).
+    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
+    /// </summary>
+    /// <remarks>
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// let result = trySelectComponentRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// </code>
+    /// </example>
+    let trySelectComponentRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.Component.SelectSql() ] @ query |> buildSql
+        context.TrySelectAnon<Records.Component>(sql, parameters)
+    
+    let insertComponent (context: SqliteContext) (parameters: Parameters.NewComponent) =
+        context.Insert("components", parameters)
+    
+    let tryInsertComponent (context: SqliteContext) (parameters: Parameters.NewComponent) =
+        context.TryInsert("components", parameters)
+    
+    /// <summary>
     /// Select a `Records.CompressionType` from the table `compression_types`.
     /// Internally this calls `context.SelectSingleAnon&lt;Records.CompressionType&gt;` and uses Records.CompressionType.SelectSql().
     /// The caller can provide extra string lines to create a query and boxed parameters.
@@ -1963,7 +2743,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -1982,7 +2762,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2001,7 +2781,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2020,7 +2800,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2046,7 +2826,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2065,7 +2845,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2084,7 +2864,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2103,7 +2883,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2129,7 +2909,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2148,7 +2928,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2167,7 +2947,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2186,7 +2966,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2212,7 +2992,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2231,7 +3011,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2250,7 +3030,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2269,7 +3049,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2295,7 +3075,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2314,7 +3094,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2333,7 +3113,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2352,7 +3132,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2370,172 +3150,6 @@ module Operations =
         context.TryInsert("resources", parameters)
     
     /// <summary>
-    /// Select a `Records.SceneObjectComponentAssetMetadataItem` from the table `scene_object_component_asset_metadata`.
-    /// Internally this calls `context.SelectSingleAnon&lt;Records.SceneObjectComponentAssetMetadataItem&gt;` and uses Records.SceneObjectComponentAssetMetadataItem.SelectSql().
-    /// The caller can provide extra string lines to create a query and boxed parameters.
-    /// It is up to the caller to verify the sql and parameters are correct,
-    /// this should be considered an internal function (not exposed in public APIs).
-    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// let result = selectSceneObjectComponentAssetMetadataItemRecord ctx "WHERE `field` = @0" [ box `value` ]
-    /// </code>
-    /// </example>
-    let selectSceneObjectComponentAssetMetadataItemRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectComponentAssetMetadataItem.SelectSql() ] @ query |> buildSql
-        context.SelectSingleAnon<Records.SceneObjectComponentAssetMetadataItem>(sql, parameters)
-    
-    /// <summary>
-    /// Internally this calls `context.SelectAnon&lt;Records.SceneObjectComponentAssetMetadataItem&gt;` and uses Records.SceneObjectComponentAssetMetadataItem.SelectSql().
-    /// The caller can provide extra string lines to create a query and boxed parameters.
-    /// It is up to the caller to verify the sql and parameters are correct,
-    /// this should be considered an internal function (not exposed in public APIs).
-    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// let result = selectSceneObjectComponentAssetMetadataItemRecords ctx "WHERE `field` = @0" [ box `value` ]
-    /// </code>
-    /// </example>
-    let selectSceneObjectComponentAssetMetadataItemRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectComponentAssetMetadataItem.SelectSql() ] @ query |> buildSql
-        context.SelectAnon<Records.SceneObjectComponentAssetMetadataItem>(sql, parameters)
-    /// <summary>
-    /// Select a `Records.SceneObjectComponentAssetMetadataItem` from the table `scene_object_component_asset_metadata`.
-    /// Internally this calls `context.TrySelectSingleAnon&lt;Records.SceneObjectComponentAssetMetadataItem&gt;` and uses Records.SceneObjectComponentAssetMetadataItem.SelectSql().
-    /// The caller can provide extra string lines to create a query and boxed parameters.
-    /// It is up to the caller to verify the sql and parameters are correct,
-    /// this should be considered an internal function (not exposed in public APIs).
-    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// let result = trySelectSceneObjectComponentAssetMetadataItemRecord ctx "WHERE `field` = @0" [ box `value` ]
-    /// </code>
-    /// </example>
-    let trySelectSceneObjectComponentAssetMetadataItemRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectComponentAssetMetadataItem.SelectSql() ] @ query |> buildSql
-        context.TrySelectSingleAnon<Records.SceneObjectComponentAssetMetadataItem>(sql, parameters)
-    
-    /// <summary>
-    /// Internally this calls `context.TrySelectAnon&lt;Records.SceneObjectComponentAssetMetadataItem&gt;` and uses Records.SceneObjectComponentAssetMetadataItem.SelectSql().
-    /// The caller can provide extra string lines to create a query and boxed parameters.
-    /// It is up to the caller to verify the sql and parameters are correct,
-    /// this should be considered an internal function (not exposed in public APIs).
-    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// let result = trySelectSceneObjectComponentAssetMetadataItemRecords ctx "WHERE `field` = @0" [ box `value` ]
-    /// </code>
-    /// </example>
-    let trySelectSceneObjectComponentAssetMetadataItemRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectComponentAssetMetadataItem.SelectSql() ] @ query |> buildSql
-        context.TrySelectAnon<Records.SceneObjectComponentAssetMetadataItem>(sql, parameters)
-    
-    let insertSceneObjectComponentAssetMetadataItem (context: SqliteContext) (parameters: Parameters.NewSceneObjectComponentAssetMetadataItem) =
-        context.Insert("scene_object_component_asset_metadata", parameters)
-    
-    let tryInsertSceneObjectComponentAssetMetadataItem (context: SqliteContext) (parameters: Parameters.NewSceneObjectComponentAssetMetadataItem) =
-        context.TryInsert("scene_object_component_asset_metadata", parameters)
-    
-    /// <summary>
-    /// Select a `Records.SceneObjectComponentAsset` from the table `scene_object_component_assets`.
-    /// Internally this calls `context.SelectSingleAnon&lt;Records.SceneObjectComponentAsset&gt;` and uses Records.SceneObjectComponentAsset.SelectSql().
-    /// The caller can provide extra string lines to create a query and boxed parameters.
-    /// It is up to the caller to verify the sql and parameters are correct,
-    /// this should be considered an internal function (not exposed in public APIs).
-    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// let result = selectSceneObjectComponentAssetRecord ctx "WHERE `field` = @0" [ box `value` ]
-    /// </code>
-    /// </example>
-    let selectSceneObjectComponentAssetRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectComponentAsset.SelectSql() ] @ query |> buildSql
-        context.SelectSingleAnon<Records.SceneObjectComponentAsset>(sql, parameters)
-    
-    /// <summary>
-    /// Internally this calls `context.SelectAnon&lt;Records.SceneObjectComponentAsset&gt;` and uses Records.SceneObjectComponentAsset.SelectSql().
-    /// The caller can provide extra string lines to create a query and boxed parameters.
-    /// It is up to the caller to verify the sql and parameters are correct,
-    /// this should be considered an internal function (not exposed in public APIs).
-    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// let result = selectSceneObjectComponentAssetRecords ctx "WHERE `field` = @0" [ box `value` ]
-    /// </code>
-    /// </example>
-    let selectSceneObjectComponentAssetRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectComponentAsset.SelectSql() ] @ query |> buildSql
-        context.SelectAnon<Records.SceneObjectComponentAsset>(sql, parameters)
-    /// <summary>
-    /// Select a `Records.SceneObjectComponentAsset` from the table `scene_object_component_assets`.
-    /// Internally this calls `context.TrySelectSingleAnon&lt;Records.SceneObjectComponentAsset&gt;` and uses Records.SceneObjectComponentAsset.SelectSql().
-    /// The caller can provide extra string lines to create a query and boxed parameters.
-    /// It is up to the caller to verify the sql and parameters are correct,
-    /// this should be considered an internal function (not exposed in public APIs).
-    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// let result = trySelectSceneObjectComponentAssetRecord ctx "WHERE `field` = @0" [ box `value` ]
-    /// </code>
-    /// </example>
-    let trySelectSceneObjectComponentAssetRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectComponentAsset.SelectSql() ] @ query |> buildSql
-        context.TrySelectSingleAnon<Records.SceneObjectComponentAsset>(sql, parameters)
-    
-    /// <summary>
-    /// Internally this calls `context.TrySelectAnon&lt;Records.SceneObjectComponentAsset&gt;` and uses Records.SceneObjectComponentAsset.SelectSql().
-    /// The caller can provide extra string lines to create a query and boxed parameters.
-    /// It is up to the caller to verify the sql and parameters are correct,
-    /// this should be considered an internal function (not exposed in public APIs).
-    /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
-    /// </summary>
-    /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// let result = trySelectSceneObjectComponentAssetRecords ctx "WHERE `field` = @0" [ box `value` ]
-    /// </code>
-    /// </example>
-    let trySelectSceneObjectComponentAssetRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectComponentAsset.SelectSql() ] @ query |> buildSql
-        context.TrySelectAnon<Records.SceneObjectComponentAsset>(sql, parameters)
-    
-    let insertSceneObjectComponentAsset (context: SqliteContext) (parameters: Parameters.NewSceneObjectComponentAsset) =
-        context.Insert("scene_object_component_assets", parameters)
-    
-    let tryInsertSceneObjectComponentAsset (context: SqliteContext) (parameters: Parameters.NewSceneObjectComponentAsset) =
-        context.TryInsert("scene_object_component_assets", parameters)
-    
-    /// <summary>
     /// Select a `Records.SceneObjectComponentMetadataItem` from the table `scene_object_component_metadata`.
     /// Internally this calls `context.SelectSingleAnon&lt;Records.SceneObjectComponentMetadataItem&gt;` and uses Records.SceneObjectComponentMetadataItem.SelectSql().
     /// The caller can provide extra string lines to create a query and boxed parameters.
@@ -2544,7 +3158,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2563,7 +3177,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2582,7 +3196,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2601,7 +3215,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2627,7 +3241,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2646,7 +3260,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2665,7 +3279,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2684,7 +3298,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2702,86 +3316,86 @@ module Operations =
         context.TryInsert("scene_object_components", parameters)
     
     /// <summary>
-    /// Select a `Records.SceneObjectMetadataItem` from the table `scene_object_metadata`.
-    /// Internally this calls `context.SelectSingleAnon&lt;Records.SceneObjectMetadataItem&gt;` and uses Records.SceneObjectMetadataItem.SelectSql().
+    /// Select a `Records.SceneObjectMetadata` from the table `scene_object_metadata`.
+    /// Internally this calls `context.SelectSingleAnon&lt;Records.SceneObjectMetadata&gt;` and uses Records.SceneObjectMetadata.SelectSql().
     /// The caller can provide extra string lines to create a query and boxed parameters.
     /// It is up to the caller to verify the sql and parameters are correct,
     /// this should be considered an internal function (not exposed in public APIs).
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
-    /// let result = selectSceneObjectMetadataItemRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// let result = selectSceneObjectMetadataRecord ctx "WHERE `field` = @0" [ box `value` ]
     /// </code>
     /// </example>
-    let selectSceneObjectMetadataItemRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectMetadataItem.SelectSql() ] @ query |> buildSql
-        context.SelectSingleAnon<Records.SceneObjectMetadataItem>(sql, parameters)
+    let selectSceneObjectMetadataRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.SceneObjectMetadata.SelectSql() ] @ query |> buildSql
+        context.SelectSingleAnon<Records.SceneObjectMetadata>(sql, parameters)
     
     /// <summary>
-    /// Internally this calls `context.SelectAnon&lt;Records.SceneObjectMetadataItem&gt;` and uses Records.SceneObjectMetadataItem.SelectSql().
+    /// Internally this calls `context.SelectAnon&lt;Records.SceneObjectMetadata&gt;` and uses Records.SceneObjectMetadata.SelectSql().
     /// The caller can provide extra string lines to create a query and boxed parameters.
     /// It is up to the caller to verify the sql and parameters are correct,
     /// this should be considered an internal function (not exposed in public APIs).
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
-    /// let result = selectSceneObjectMetadataItemRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// let result = selectSceneObjectMetadataRecords ctx "WHERE `field` = @0" [ box `value` ]
     /// </code>
     /// </example>
-    let selectSceneObjectMetadataItemRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectMetadataItem.SelectSql() ] @ query |> buildSql
-        context.SelectAnon<Records.SceneObjectMetadataItem>(sql, parameters)
+    let selectSceneObjectMetadataRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.SceneObjectMetadata.SelectSql() ] @ query |> buildSql
+        context.SelectAnon<Records.SceneObjectMetadata>(sql, parameters)
     /// <summary>
-    /// Select a `Records.SceneObjectMetadataItem` from the table `scene_object_metadata`.
-    /// Internally this calls `context.TrySelectSingleAnon&lt;Records.SceneObjectMetadataItem&gt;` and uses Records.SceneObjectMetadataItem.SelectSql().
+    /// Select a `Records.SceneObjectMetadata` from the table `scene_object_metadata`.
+    /// Internally this calls `context.TrySelectSingleAnon&lt;Records.SceneObjectMetadata&gt;` and uses Records.SceneObjectMetadata.SelectSql().
     /// The caller can provide extra string lines to create a query and boxed parameters.
     /// It is up to the caller to verify the sql and parameters are correct,
     /// this should be considered an internal function (not exposed in public APIs).
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
-    /// let result = trySelectSceneObjectMetadataItemRecord ctx "WHERE `field` = @0" [ box `value` ]
+    /// let result = trySelectSceneObjectMetadataRecord ctx "WHERE `field` = @0" [ box `value` ]
     /// </code>
     /// </example>
-    let trySelectSceneObjectMetadataItemRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectMetadataItem.SelectSql() ] @ query |> buildSql
-        context.TrySelectSingleAnon<Records.SceneObjectMetadataItem>(sql, parameters)
+    let trySelectSceneObjectMetadataRecord (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.SceneObjectMetadata.SelectSql() ] @ query |> buildSql
+        context.TrySelectSingleAnon<Records.SceneObjectMetadata>(sql, parameters)
     
     /// <summary>
-    /// Internally this calls `context.TrySelectAnon&lt;Records.SceneObjectMetadataItem&gt;` and uses Records.SceneObjectMetadataItem.SelectSql().
+    /// Internally this calls `context.TrySelectAnon&lt;Records.SceneObjectMetadata&gt;` and uses Records.SceneObjectMetadata.SelectSql().
     /// The caller can provide extra string lines to create a query and boxed parameters.
     /// It is up to the caller to verify the sql and parameters are correct,
     /// this should be considered an internal function (not exposed in public APIs).
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
-    /// let result = trySelectSceneObjectMetadataItemRecords ctx "WHERE `field` = @0" [ box `value` ]
+    /// let result = trySelectSceneObjectMetadataRecords ctx "WHERE `field` = @0" [ box `value` ]
     /// </code>
     /// </example>
-    let trySelectSceneObjectMetadataItemRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
-        let sql = [ Records.SceneObjectMetadataItem.SelectSql() ] @ query |> buildSql
-        context.TrySelectAnon<Records.SceneObjectMetadataItem>(sql, parameters)
+    let trySelectSceneObjectMetadataRecords (context: SqliteContext) (query: string list) (parameters: obj list) =
+        let sql = [ Records.SceneObjectMetadata.SelectSql() ] @ query |> buildSql
+        context.TrySelectAnon<Records.SceneObjectMetadata>(sql, parameters)
     
-    let insertSceneObjectMetadataItem (context: SqliteContext) (parameters: Parameters.NewSceneObjectMetadataItem) =
+    let insertSceneObjectMetadata (context: SqliteContext) (parameters: Parameters.NewSceneObjectMetadata) =
         context.Insert("scene_object_metadata", parameters)
     
-    let tryInsertSceneObjectMetadataItem (context: SqliteContext) (parameters: Parameters.NewSceneObjectMetadataItem) =
+    let tryInsertSceneObjectMetadata (context: SqliteContext) (parameters: Parameters.NewSceneObjectMetadata) =
         context.TryInsert("scene_object_metadata", parameters)
     
     /// <summary>
@@ -2793,7 +3407,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2812,7 +3426,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2831,7 +3445,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2850,7 +3464,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2876,7 +3490,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2895,7 +3509,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2914,7 +3528,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2933,7 +3547,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2959,7 +3573,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2978,7 +3592,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -2997,7 +3611,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -3016,7 +3630,7 @@ module Operations =
     /// Parameters are assigned names based on their order in 0 indexed array. For example: @0,@1,@2...
     /// </summary>
     /// <remarks>
-    /// This record was generated via Freql.Tools on 28/08/2026 22:46:40
+    /// This record was generated via Freql.Tools on 31/08/2026 18:08:10
     /// </remarks>
     /// <example>
     /// <code>
@@ -3036,18 +3650,22 @@ module Operations =
 [<RequireQualifiedAccess>]
 module Initialization =
     let sql (checkIfExists: bool) =
-        [ Records.SceneObjectComponent.InitializationSql checkIfExists
+        [ Records.Component.InitializationSql checkIfExists
+          Records.ComponentVersion.InitializationSql checkIfExists
           Records.FileType.InitializationSql checkIfExists
           Records.Scene.InitializationSql checkIfExists
-          Records.SceneObjectComponentAsset.InitializationSql checkIfExists
+          Records.SceneObjectComponent.InitializationSql checkIfExists
           Records.Resource.InitializationSql checkIfExists
+          Records.ComponentAsset.InitializationSql checkIfExists
           Records.SceneVersion.InitializationSql checkIfExists
-          Records.SceneObjectMetadataItem.InitializationSql checkIfExists
+          Records.SceneObjectMetadata.InitializationSql checkIfExists
           Records.SceneObjectComponentMetadataItem.InitializationSql checkIfExists
-          Records.SceneObjectComponentAssetMetadataItem.InitializationSql checkIfExists
           Records.ResourceMetadataItem.InitializationSql checkIfExists
           Records.EncryptionType.InitializationSql checkIfExists
           Records.CompressionType.InitializationSql checkIfExists
+          Records.ComponentVersionMetadataItem.InitializationSql checkIfExists
+          Records.ComponentMetadataItem.InitializationSql checkIfExists
+          Records.ComponentAssetMetadataItem.InitializationSql checkIfExists
           Records.AssetVersionResource.InitializationSql checkIfExists
           Records.AssetVersionMetadataItem.InitializationSql checkIfExists
           Records.AssetType.InitializationSql checkIfExists

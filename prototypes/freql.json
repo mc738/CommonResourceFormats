@@ -99,21 +99,35 @@
                         "replacementName": "scene_object_component"
                     },
                     {
-                        "name": "scene_object_component_assets",
-                        "replacementName": "scene_object_component_asset"
+                        "name": "components",
+                        "replacementName": "component"
                     },
                     {
-                        "name": "scene_object_metadata",
-                        "replacementName": "scene_object_metadata_item"
+                        "name": "component_versions",
+                        "replacementName": "component_version"
                     },
                     {
                         "name": "scene_object_component_metadata",
                         "replacementName": "scene_object_component_metadata_item"
                     },
                     {
-                        "name": "scene_object_component_asset_metadata",
-                        "replacementName": "scene_object_component_asset_metadata_item"
+                        "name": "component_metadata",
+                        "replacementName": "component_metadata_item"
+                    },
+                    {
+                        "name": "component_version_metadata",
+                        "replacementName": "component_version_metadata_item"
+                    },
+                    {
+                        "name": "component_assets",
+                        "replacementName": "component_asset"
+                    },
+                    {
+                        "name": "component_asset_metadata",
+                        "replacementName": "component_asset_metadata_item"
                     }
+                    
+                    
                 ]
             }
         ]
