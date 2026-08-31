@@ -8,14 +8,15 @@ module private Cfg =
 [<RequireQualifiedAccess>]
 type EntityId =
     | Guid of Guid
-    
+
     static member Deserialize(str: string) =
-        Guid.ParseExact(str, Cfg.serializationFormation)
-        |> EntityId.Guid
-    
-    static member Create() = EntityId.Guid <| Guid.NewGuid()    
-    
-    member eid.Serialize() = match eid with Guid guid -> guid.ToString(Cfg.serializationFormation)
+        Guid.ParseExact(str, Cfg.serializationFormation) |> EntityId.Guid
+
+    static member Create() = EntityId.Guid <| Guid.NewGuid()
+
+    member eid.Serialize() =
+        match eid with
+        | Guid guid -> guid.ToString(Cfg.serializationFormation)
 
 [<RequireQualifiedAccess>]
 type Version =
@@ -42,26 +43,22 @@ and AssetResource =
       Metadata: Map<string, string> }
 
 type ComponentAsset =
-    {
-        Id: EntityId
-        Asset: Asset
-        Metadata: Map<string, string>
-    }
+    { Id: EntityId
+      Asset: Asset
+      Metadata: Map<string, string> }
 
 type Component =
-    {
-        Id: EntityId
-        VersionId: EntityId
-        Version: int
-        ComponentType: string
-        
-        Metadata: Map<string, string>
-        VersionMetadata: Map<string, string>
-        
-        SerializedData: string
-        
-        Assets: ComponentAsset ResizeArray
-    }
+    { Id: EntityId
+      VersionId: EntityId
+      Version: int
+      ComponentType: string
+
+      Metadata: Map<string, string>
+      VersionMetadata: Map<string, string>
+
+      SerializedData: string
+
+      Assets: ComponentAsset ResizeArray }
 
 type SceneObject =
     { Id: EntityId
@@ -83,4 +80,22 @@ and SceneObjectComponent =
         Metadata: Map<string, string>
     }
 
-type Scene = { Objects: SceneObject ResizeArray }
+type Scene =
+    { Id: EntityId
+      VersionId: EntityId
+      Version: int
+      Name: string
+
+      // TODO metadata
+
+      Objects: SceneObject ResizeArray }
+
+
+type SceneListings = { Scenes: SceneListingItem list }
+
+and SceneListingItem =
+    { Id: EntityId
+      Name: string
+      Versions: SceneVersionListingItem list }
+
+and SceneVersionListingItem = { Id: EntityId; Version: int }

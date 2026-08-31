@@ -125,6 +125,14 @@
                     {
                         "name": "component_asset_metadata",
                         "replacementName": "component_asset_metadata_item"
+                    },
+                    {
+                        "name": "scene_metadata",
+                        "replacementName": "scene_metadata_item"
+                    },
+                    {
+                        "name": "scene_version_metadata",
+                        "replacementName": "scene_version_metadata_item"
                     }
                     
                     

@@ -3,26 +3,13 @@
 open System
 open System.Collections.Generic
 open CommonResourceFormats.AssetStore.Core.Domain
+open CommonResourceFormats.AssetStore.Core.Exceptions
 open Freql.Sqlite
 open CommonResourceFormats.AssetStore.Core
 open CommonResourceFormats.AssetStore.Store.Persistence
 open FsToolbox.GameDevelopment.Core
 
 module Scenes =
-
-    module Internal =
-
-
-        let entityTypeName = "scene"
-
-        let getSceneAndVersionRecords (ctx: SqliteContext) (sceneId: EntityId) (version: Version) =
-            Generic.getEntityAndVersion
-                Operations.selectSceneRecord
-                Operations.selectSceneVersionRecord
-                entityTypeName
-                ctx
-                sceneId
-                version
 
 
     [<RequireQualifiedAccess>]
@@ -31,23 +18,24 @@ module Scenes =
 
         type AddResult = Successful of EntityId
 
-        and AddFailure = Generic of Generic.GenericFailure
+        and AddFailure = SceneVersionNotFound of EntityId
 
         let add
             (ctx: SqliteContext)
-            (version: Domain.Version)
-            (sceneId: EntityId)
+            (sceneVersionId: EntityId)
             (parent: EntityId option)
+            (name: string)
             (transform: Transform)
             =
-            Internal.getSceneAndVersionRecords ctx sceneId version
-            |> Result.bind (fun (sr, svr) ->
+            match Operations.selectSceneVersionRecord ctx [ "WHERE id = @0" ] [ sceneVersionId.Serialize() ] with
+            | None -> Error(AddFailure.SceneVersionNotFound sceneVersionId)
+            | Some svr ->
                 let eId = EntityId.Create()
 
                 Operations.insertSceneObject
                     ctx
                     ({ Id = eId.Serialize()
-                       Name = "[obj]"
+                       Name = name
                        SceneVersionId = svr.Id
                        Parent = parent |> Option.map _.Serialize()
                        TransformPositionX = transform.Position.X
@@ -62,7 +50,7 @@ module Scenes =
                        TransformScaleZ = transform.Scale.Z }
                     : Parameters.NewSceneObject)
 
-                Ok eId)
+                Ok eId
 
         let build (ctx: SqliteContext) (sor: Records.SceneObject) (children: ResizeArray<SceneObject>) =
             let eId = EntityId.Deserialize sor.Id
@@ -105,13 +93,23 @@ module Scenes =
                Metadata = [] |> Map.ofList }
             : SceneObject)
 
-    [<RequireQualifiedAccess>]
-    type GetSceneFailure = Generic of Generic.GenericFailure
 
-    let getScene (ctx: SqliteContext) (version: Domain.Version) (sceneId: EntityId) =
-        Internal.getSceneAndVersionRecords ctx sceneId version
-        //|> Result.mapError GetSceneFailure.Generic
-        |> Result.map (fun (sr, svr) ->
+    module Internal =
+
+
+        let entityTypeName = "scene"
+
+        let getSceneAndVersionRecords (ctx: SqliteContext) (sceneId: EntityId) (version: Version) =
+            Generic.getEntityAndVersion
+                Operations.selectSceneRecord
+                Operations.selectSceneVersionRecord
+                entityTypeName
+                ctx
+                sceneId
+                version
+
+
+        let build (ctx: SqliteContext) (sr: Records.Scene) (svr: Records.SceneVersion) =
             let topLevelObjects = ResizeArray<Records.SceneObject>()
             let buckets = Dictionary<Guid, ResizeArray<Records.SceneObject>>()
 
@@ -141,7 +139,22 @@ module Scenes =
 
                 Objects.build ctx sor children
 
-            ({ Objects = topLevelObjects |> Seq.map (traverse) |> ResizeArray }: Scene))
+            ({ Id = EntityId.Deserialize sr.Id
+               Name = sr.Name
+               VersionId = EntityId.Deserialize svr.Id
+               Version = svr.Version
+               Objects = topLevelObjects |> Seq.map (traverse) |> ResizeArray }
+            : Scene)
+
+
+
+    [<RequireQualifiedAccess>]
+    type GetSceneFailure = Generic of Generic.GenericFailure
+
+    let getScene (ctx: SqliteContext) (version: Domain.Version) (sceneId: EntityId) =
+        Internal.getSceneAndVersionRecords ctx sceneId version
+        //|> Result.mapError GetSceneFailure.Generic
+        |> Result.map (fun (sr, svr) -> Internal.build ctx sr svr)
 
     [<RequireQualifiedAccess>]
     type AddSceneResult =
@@ -163,4 +176,36 @@ module Scenes =
                Version = 1 }
             : Parameters.NewSceneVersion)
 
-        id
+        { Id = sId
+          Name = name
+          VersionId = svId
+          Version = 1
+          Objects = ResizeArray<SceneObject>() }
+
+
+    let getListings (ctx: SqliteContext) =
+        { Scenes =
+            Operations.selectSceneRecords ctx [] []
+            |> List.map (fun sr ->
+                ({ Id = EntityId.Deserialize sr.Id
+                   Name = sr.Name
+                   Versions =
+                     Operations.selectSceneVersionRecords ctx [ "WHERE scene_id = @0" ] [ sr.Id ]
+                     |> List.map (fun svr ->
+                         ({ Id = EntityId.Deserialize svr.Id
+                            Version = svr.Version }
+                         : SceneVersionListingItem)) }
+                : SceneListingItem)) }
+
+    [<RequireQualifiedAccess>]
+    type GetVersionFailure = SceneVersionNotFound of EntityId
+
+    let getVersion (ctx: SqliteContext) (sceneVersionId: EntityId) =
+        match Operations.selectSceneVersionRecord ctx [ "WHERE id = @0" ] [ sceneVersionId.Serialize() ] with
+        | None -> Error(GetVersionFailure.SceneVersionNotFound sceneVersionId)
+        | Some svr ->
+            let sr =
+                Operations.selectSceneRecord ctx [ "WHERE id = @0" ] [ svr.SceneId ]
+                |> Option.defaultWith (fun () -> raise (IllegalDatabaseState()))
+                
+            Internal.build ctx sr svr |> Ok
