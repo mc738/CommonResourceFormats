@@ -2,6 +2,7 @@
 
 open System
 open System.Collections.Generic
+open System.Numerics
 open CommonResourceFormats.AssetStore.Core.Domain
 open CommonResourceFormats.AssetStore.Core.Exceptions
 open Freql.Sqlite
@@ -52,20 +53,34 @@ module Scenes =
 
                 Ok eId
 
+        let buildTransform (sor: Records.SceneObject) =
+            let mutable t = Transform.Default
+
+            t.Position <- Vector3(sor.TransformPositionX, sor.TransformPositionY, sor.TransformPositionZ)
+
+            t.Rotation <-
+                Quaternion(
+                    sor.TransformRotationX,
+                    sor.TransformRotationY,
+                    sor.TransformRotationZ,
+                    sor.TransformRotationW
+                )
+
+            t.Scale <- Vector3(sor.TransformScaleX, sor.TransformScaleY, sor.TransformScaleZ)
+
+            t
+
         let build (ctx: SqliteContext) (sor: Records.SceneObject) (children: ResizeArray<SceneObject>) =
             let eId = EntityId.Deserialize sor.Id
 
             ({ Id = eId
                Name = sor.Name
                Children = children
+               Transform = buildTransform sor
                Components =
                  Operations.selectSceneObjectComponentRecords ctx [ "WHERE scene_object_id = @0" ] [ sor.Id ]
                  |> List.map (fun ocr ->
                      let cId = EntityId.Deserialize ocr.Id
-
-                     //match Components.getVersion ctx cId with
-                     //|
-
 
                      match Components.getVersion ctx cId with
                      | Error errorValue -> failwith "todo"
@@ -92,6 +107,37 @@ module Scenes =
                  |> ResizeArray
                Metadata = [] |> Map.ofList }
             : SceneObject)
+
+        let updateTransform (ctx: SqliteContext) (sceneObjectId: EntityId) (transform: Transform) =
+            ctx.ExecuteVerbatimNonQuery(
+                """
+                UPDATE scene_objects 
+                SET
+                    transform_position_x = @0,
+                    transform_position_y = @1,
+                    transform_position_z = @2,
+                    transform_rotation_x = @3,
+                    transform_rotation_y = @4,
+                    transform_rotation_z = @5,
+                    transform_rotation_w = @6,
+                    transform_scale_x = @7,
+                    transform_scale_y = @8,
+                    transform_scale_z = @9
+                WHERE 
+                    id = @10
+            """,
+                [ transform.Position.X
+                  transform.Position.Y
+                  transform.Position.Z
+                  transform.Rotation.X
+                  transform.Rotation.Y
+                  transform.Rotation.Z
+                  transform.Rotation.W
+                  transform.Scale.X
+                  transform.Scale.Y
+                  transform.Scale.Z ]
+            )
+            |> ignore
 
 
     module Internal =
@@ -182,7 +228,6 @@ module Scenes =
           Version = 1
           Objects = ResizeArray<SceneObject>() }
 
-
     let getListings (ctx: SqliteContext) =
         { Scenes =
             Operations.selectSceneRecords ctx [] []
@@ -207,5 +252,5 @@ module Scenes =
             let sr =
                 Operations.selectSceneRecord ctx [ "WHERE id = @0" ] [ svr.SceneId ]
                 |> Option.defaultWith (fun () -> raise (IllegalDatabaseState()))
-                
+
             Internal.build ctx sr svr |> Ok

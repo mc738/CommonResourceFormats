@@ -29,3 +29,6 @@ type AssetStoreContext(path: string) as this =
         
     member _.GetSceneVersion(sceneVersionId: EntityId) =
         Operations.Scenes.getVersion ctx sceneVersionId
+        
+    member _.UpdateSceneObjectTransform(sceneObjectId: EntityId, transform: Transform) =
+        Operations.Scenes.Objects.updateTransform ctx sceneObjectId transform

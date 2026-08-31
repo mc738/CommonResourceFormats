@@ -1,6 +1,7 @@
 ﻿namespace CommonResourceFormats.AssetStore.Core.Domain
 
 open System
+open FsToolbox.GameDevelopment.Core
 
 module private Cfg =
     let serializationFormation = "n"
@@ -65,6 +66,7 @@ type SceneObject =
       Name: string
       Children: SceneObject ResizeArray
       Components: SceneObjectComponent ResizeArray
+      Transform: Transform
       Metadata: Map<string, string> }
 
 and SceneObjectComponent =
