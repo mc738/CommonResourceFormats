@@ -32,3 +32,7 @@ type AssetStoreContext(path: string) as this =
         
     member _.UpdateSceneObjectTransform(sceneObjectId: EntityId, transform: Transform) =
         Operations.Scenes.Objects.updateTransform ctx sceneObjectId transform
+        
+        
+    member _.AddNewAsset(asset: NewAsset) =
+        Operations.Assets.addNew ctx asset

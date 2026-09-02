@@ -1,6 +1,8 @@
 ﻿namespace CommonResourceFormats.AssetStore.Core.Domain
 
 open System
+open System.IO
+open System.Text.RegularExpressions
 open FsToolbox.GameDevelopment.Core
 
 module private Cfg =
@@ -24,6 +26,33 @@ type Version =
     | Latest
     | Specific of int
 
+[<RequireQualifiedAccess>]
+type EntityPath =
+    | Relative of RelativePathType * string
+    | Absolute of string
+
+    static member Deserialize(str: string) =
+        match str with
+        | _ when str.StartsWith("$") -> Relative(RelativePathType.Root, str.Substring(2))
+        | _ when str.StartsWith("%") ->
+            let name = Regex.Match(str, "^%(.*)%").Value.Replace("%", "")
+            Relative(RelativePathType.Named(name.Replace("%", "")), str.Substring(name.Length + 1))
+        | _ -> EntityPath.Absolute str
+
+    member ep.Serialize() =
+        match ep with
+        | Relative(relativePathType, s) ->
+            Path.Combine(
+                (match relativePathType with
+                 | RelativePathType.Root -> "$"
+                 | RelativePathType.Named name -> $"%%{name}%%"),
+                s
+            )
+        | Absolute s -> s
+
+and [<RequireQualifiedAccess>] RelativePathType =
+    | Root
+    | Named of Name: string
 
 type Asset =
     { Id: EntityId
@@ -33,6 +62,7 @@ type Asset =
       IsPrototype: bool
       Metadata: Map<string, string>
       VersionMetadata: Map<string, string>
+      Path: EntityPath
       Resources: AssetResource ResizeArray }
 
 and AssetResource =
@@ -42,6 +72,17 @@ and AssetResource =
       FileType: string
       Hash: string
       Metadata: Map<string, string> }
+
+
+type NewAsset =
+    { Id: EntityId
+      VersionId: EntityId
+      AssetType: string
+      IsPrototype: bool
+      Metadata: Map<string, string>
+      VersionMetadata: Map<string, string>
+      Path: EntityPath }
+
 
 type ComponentAsset =
     { Id: EntityId

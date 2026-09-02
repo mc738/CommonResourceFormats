@@ -75,6 +75,7 @@ module Assets =
               IsPrototype = evr.IsPrototype
               Metadata = getMetadata ctx entityId
               VersionMetadata = getVersionMetadata ctx entityId
+              Path = evr.AssetPath |> EntityPath.Deserialize
               Resources =
                 Operations.selectAssetVersionResourceRecords ctx [ "WHERE asset_version_id = @0" ] [ evr.Id ]
                 |> List.map (fun avr ->
@@ -88,9 +89,35 @@ module Assets =
                        FileType = failwith "todo"
                        Hash = failwith "todo"
                        Metadata = failwith "todo" }
-                    : AssetResource)
-                )
+                    : AssetResource))
                 |> ResizeArray }
+
+
+    let addNew (ctx: SqliteContext) (asset: NewAsset) =
+        let createdOn = DateTime.UtcNow
+
+        ({ Id = asset.Id.Serialize()
+           Name = failwith "todo"
+           AssetType = asset.AssetType
+           CreatedOn = createdOn }
+        : Parameters.NewAsset)
+        |> Operations.insertAsset ctx
+
+
+        ({ Id = asset.VersionId.Serialize()
+           AssetId = asset.Id.Serialize()
+           Version = 1
+           IsPrototype = asset.IsPrototype
+           CreatedOn = createdOn
+           Active = true
+           AssetPath = asset.Path.Serialize() }
+        : Parameters.NewAssetVersion)
+        |> Operations.insertAssetVersion ctx
+
+
+        // TODO add metadata
+
+        ()
 
     let add (ctx: SqliteContext) (assetType: string) (name: string) =
         let id = EntityId.Create()
@@ -107,7 +134,7 @@ module Assets =
         | AssetNotFound of EntityId
         | AssetVersionAlreadyExists of EntityId * int
 
-    let addVersion (ctx: SqliteContext) (asset: EntityId) (version: Version) (isPrototype: bool) =
+    let addVersion (ctx: SqliteContext) (asset: EntityId) (version: Version) (isPrototype: bool) (path: EntityPath) =
         let id = EntityId.Create()
 
         match Operations.selectAssetRecord ctx [ "WHERE id = @0" ] [ asset.Serialize() ] with
@@ -133,7 +160,8 @@ module Assets =
                    Version = versionNumber
                    IsPrototype = isPrototype
                    CreatedOn = DateTime.UtcNow
-                   Active = true }
+                   Active = true
+                   AssetPath = failwith "todo" }
                 : Parameters.NewAssetVersion)
                 |> Operations.insertAssetVersion ctx
 
@@ -149,7 +177,8 @@ module Assets =
                        Version = i
                        IsPrototype = isPrototype
                        CreatedOn = DateTime.UtcNow
-                       Active = true }
+                       Active = true
+                       AssetPath = path.Serialize() }
                     : Parameters.NewAssetVersion)
                     |> Operations.insertAssetVersion ctx
 
