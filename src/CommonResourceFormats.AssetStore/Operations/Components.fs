@@ -1,6 +1,7 @@
 ﻿namespace CommonResourceFormats.AssetStore.Operations
 
 open System
+open System.Collections.Generic
 open CommonResourceFormats.AssetStore.Core.Domain
 open Freql.Sqlite
 open CommonResourceFormats.AssetStore.Store.Persistence
@@ -9,14 +10,18 @@ open CommonResourceFormats.AssetStore.Store.Persistence
 
 [<RequireQualifiedAccess>]
 module Components =
-    
+
     [<ReferenceEquality>]
     type BuildComponentResults =
         | Success of Component
         | Partial of Component * BuildComponentError list
-        
-    and [<RequireQualifiedAccess>] BuildComponentError =
-        | AssetVersion of Assets.GetVersionFailure
+
+        member bcr.Component =
+            match bcr with
+            | Success comp
+            | Partial(comp, _) -> comp
+
+    and [<RequireQualifiedAccess>] BuildComponentError = AssetVersion of Assets.GetVersionFailure
 
     module private Internal =
 
@@ -77,15 +82,11 @@ module Components =
                 )
                 |> ignore
 
-        let buildModel
-            (ctx: SqliteContext)
-            (er: Records.Component)
-            (evr: Records.ComponentVersion)
-            =
+        let buildModel (ctx: SqliteContext) (er: Records.Component) (evr: Records.ComponentVersion) =
             let entityId = EntityId.Deserialize er.Id
-            
+
             let errors = ResizeArray<BuildComponentError>()
-            
+
             let comp =
                 { Id = entityId
                   VersionId = EntityId.Deserialize evr.Id
@@ -103,19 +104,21 @@ module Components =
 
                         match Assets.getVersion ctx (EntityId.Deserialize car.AssetVersionId) with
                         | Ok asset ->
-                            ({ Id = caId
-                               Asset = asset
-                               Metadata = Generic.getMetadataForEntity ctx "component_asset" caId }
-                            : ComponentAsset)
+                            KeyValuePair(
+                                caId,
+                                ({ Id = caId
+                                   Asset = asset
+                                   Metadata = Generic.getMetadataForEntity ctx "component_asset" caId }
+                                : ComponentAsset)
+                            )
                             |> Some
                         | Error errorValue ->
                             errors.Add(BuildComponentError.AssetVersion errorValue)
-                            None
-                        )
-                    |> ResizeArray }
-            
+                            None)
+                    |> Dictionary<ComponentAssetId, ComponentAsset> }
+
             match errors.Count > 0 with
-            | true -> BuildComponentResults.Partial (comp, errors |> Seq.toList)
+            | true -> BuildComponentResults.Partial(comp, errors |> Seq.toList)
             | false -> BuildComponentResults.Success comp
 
     // ********** Add **************
@@ -295,8 +298,8 @@ module Components =
             | Generic.EntityNotFound(_, id) -> Error <| GetFailure.ComponentNotFound id
             | Generic.EntityVersionNotFound(_, id, version) -> Error <| GetFailure.ComponentVersionNotFound(id, version)
         | Ok(er, evr) -> Internal.buildModel ctx er evr |> Ok
-        
-        
+
+
     let getListings (ctx: SqliteContext) =
         { Entities =
             Operations.selectComponentRecords ctx [] []

@@ -1,6 +1,7 @@
 ﻿namespace CommonResourceFormats.AssetStore.Core.Domain
 
 open System
+open System.Collections.Generic
 open System.IO
 open System.Text.RegularExpressions
 open FsToolbox.GameDevelopment.Core
@@ -21,6 +22,22 @@ type EntityId =
         match eid with
         | Guid guid -> guid.ToString(Cfg.serializationFormation)
 
+[<RequireQualifiedAccess>]
+type EntityKey =
+    | Namespace of Namespace: string * Key: string
+    | Literal of string
+
+    member ek.Create(str: string) =
+        match str.Contains(":") with
+        | true ->
+            let (h, t) = str.Split([| ':' |]) |> fun r -> r[0], r[1]
+            EntityKey.Namespace(h, t)
+        | false -> EntityKey.Literal str
+
+    member ek.Serialize() =
+        match ek with
+        | Namespace(ns, key) -> $"{ns}:{key}"
+        | Literal s -> s
 
 type EntityMetadata =
     { Raw: Map<string, string> }
@@ -31,9 +48,23 @@ type EntityMetadata =
 
     static member FromMap(map: Map<string, string>) = { Raw = map }
 
-    member emd.TryGet(key: string) = emd.Raw.TryFind key
-
-    member emd.TryGet(ns: string, key: string) = emd.Raw.TryFind $"{ns}:{key}"
+    member emd.TryGet(key: EntityKey) = emd.Raw.TryFind <| key.Serialize()
+    
+    member emd.TryGetBool(key: EntityKey) =
+        emd.TryGet key
+        |> Option.bind (fun v ->
+            match v.ToLowerInvariant() with
+            | "1"
+            | "y"
+            | "t"
+            | "true"
+            | "yes"
+            | "ok" -> Some true
+            | "0"
+            | "n"
+            | "f"
+            | "false" -> Some false
+            | _ -> None)
 
 
 [<RequireQualifiedAccess>]
@@ -88,7 +119,6 @@ and AssetResource =
       Hash: string
       Metadata: EntityMetadata }
 
-
 type NewAsset =
     { Id: EntityId
       VersionId: EntityId
@@ -99,11 +129,12 @@ type NewAsset =
       VersionMetadata: EntityMetadata
       Path: EntityPath }
 
-
 type ComponentAsset =
     { Id: EntityId
       Asset: Asset
       Metadata: EntityMetadata }
+
+type ComponentAssetId = EntityId
 
 type Component =
     { Id: EntityId
@@ -117,7 +148,7 @@ type Component =
 
       SerializedData: string
 
-      Assets: ComponentAsset ResizeArray }
+      Assets: Dictionary<ComponentAssetId, ComponentAsset> }
 
 type NewComponent =
     { Id: EntityId
