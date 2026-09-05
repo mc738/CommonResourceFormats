@@ -77,6 +77,7 @@ and AssetResource =
 type NewAsset =
     { Id: EntityId
       VersionId: EntityId
+      Name: string
       AssetType: string
       IsPrototype: bool
       Metadata: Map<string, string>
@@ -93,6 +94,7 @@ type Component =
     { Id: EntityId
       VersionId: EntityId
       Version: int
+      Name: string
       ComponentType: string
 
       Metadata: Map<string, string>
@@ -101,6 +103,15 @@ type Component =
       SerializedData: string
 
       Assets: ComponentAsset ResizeArray }
+
+type NewComponent =
+    { Id: EntityId
+      VersionId: EntityId
+      Name: string
+      ComponentType: string
+      Metadata: Map<string, string>
+      VersionMetadata: Map<string, string>
+      SerializedData: string }
 
 type SceneObject =
     { Id: EntityId
@@ -133,12 +144,11 @@ type Scene =
 
       Objects: SceneObject ResizeArray }
 
+type EntityListings = { Entities: EntitiesListingItem list }
 
-type SceneListings = { Scenes: SceneListingItem list }
-
-and SceneListingItem =
+and EntitiesListingItem =
     { Id: EntityId
       Name: string
-      Versions: SceneVersionListingItem list }
+      Versions: EntityVersionListingItem list }
 
-and SceneVersionListingItem = { Id: EntityId; Version: int }
+and EntityVersionListingItem = { Id: EntityId; Version: int }

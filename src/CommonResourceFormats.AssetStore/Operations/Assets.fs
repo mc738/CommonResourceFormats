@@ -97,7 +97,7 @@ module Assets =
         let createdOn = DateTime.UtcNow
 
         ({ Id = asset.Id.Serialize()
-           Name = failwith "todo"
+           Name = asset.Name
            AssetType = asset.AssetType
            CreatedOn = createdOn }
         : Parameters.NewAsset)
@@ -213,11 +213,17 @@ module Assets =
 
             Internal.buildModel ctx er evr |> Ok
 
-    // ************ Get ************
-    let get (ctx: SqliteContext) (assetId: EntityId) (version: Version) =
-        match Internal.getAssetAndVersion ctx assetId version with
-        | Error errorValue ->
-            match errorValue with
-            | Generic.EntityNotFound(_, id) -> Error <| GetFailure.AssetNotFound id
-            | Generic.EntityVersionNotFound(_, id, version) -> Error <| GetFailure.AssetVersionNotFound(id, version)
-        | Ok(er, evr) -> Internal.buildModel ctx er evr |> Ok
+
+    let getListings (ctx: SqliteContext) =
+        { Entities =
+            Operations.selectAssetRecords ctx [] []
+            |> List.map (fun sr ->
+                ({ Id = EntityId.Deserialize sr.Id
+                   Name = sr.Name
+                   Versions =
+                     Operations.selectAssetVersionRecords ctx [ "WHERE asset_id = @0" ] [ sr.Id ]
+                     |> List.map (fun svr ->
+                         ({ Id = EntityId.Deserialize svr.Id
+                            Version = svr.Version }
+                         : EntityVersionListingItem)) }
+                : EntitiesListingItem)) }

@@ -14,11 +14,6 @@ module Resources =
     
     let add (ctx: SqliteContext) =
         ()
- 
-
-
-    
-    
     
     let getMetadata (ctx: SqliteContext) (resourceId: EntityId) =
         Generic.getMetadataForEntity ctx Internal.entityTypeName resourceId

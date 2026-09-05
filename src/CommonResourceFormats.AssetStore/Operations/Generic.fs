@@ -39,7 +39,7 @@ module Generic =
 
     let getMetadataForEntity (ctx: SqliteContext) (entityTypeName: string) (entityId: EntityId) =
         ctx.Bespoke(
-            $"SELECT item_key, item_value FROM {entityTypeName}_metadata WHERE {entityId}_id = @0",
+            $"SELECT item_key, item_value FROM {entityTypeName}_metadata WHERE {entityTypeName}_id = @0",
             [ entityId.Serialize() ],
             fun r ->
                 [ while r.Read() do

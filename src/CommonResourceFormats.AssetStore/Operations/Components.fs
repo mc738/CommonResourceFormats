@@ -90,6 +90,7 @@ module Components =
                 { Id = entityId
                   VersionId = EntityId.Deserialize evr.Id
                   Version = evr.Version
+                  Name = er.Name
                   ComponentType = er.ComponentType
                   Metadata = getMetadata ctx entityId
                   VersionMetadata = getVersionMetadata ctx entityId
@@ -123,6 +124,7 @@ module Components =
         let id = EntityId.Create()
 
         ({ Id = id.Serialize()
+           Name = ""
            ComponentType = componentType }
         : Parameters.NewComponent)
         |> Operations.insertComponent ctx
@@ -181,6 +183,26 @@ module Components =
 
                 Ok id
 
+    let addNew (ctx: SqliteContext) (comp: NewComponent) =
+        let createdOn = DateTime.UtcNow
+
+        ({ Id = comp.Id.Serialize()
+           Name = comp.Name
+           ComponentType = comp.ComponentType }
+        : Parameters.NewComponent)
+        |> Operations.insertComponent ctx
+
+
+        ({ Id = comp.VersionId.Serialize()
+           ComponentId = comp.Id.Serialize()
+           Version = 1
+           ComponentData = comp.SerializedData }
+        : Parameters.NewComponentVersion)
+        |> Operations.insertComponentVersion ctx
+
+        // TODO add metadata
+
+        ()
 
     // ********** Update **********
     [<RequireQualifiedAccess>]
@@ -273,3 +295,18 @@ module Components =
             | Generic.EntityNotFound(_, id) -> Error <| GetFailure.ComponentNotFound id
             | Generic.EntityVersionNotFound(_, id, version) -> Error <| GetFailure.ComponentVersionNotFound(id, version)
         | Ok(er, evr) -> Internal.buildModel ctx er evr |> Ok
+        
+        
+    let getListings (ctx: SqliteContext) =
+        { Entities =
+            Operations.selectComponentRecords ctx [] []
+            |> List.map (fun sr ->
+                ({ Id = EntityId.Deserialize sr.Id
+                   Name = sr.Name
+                   Versions =
+                     Operations.selectComponentVersionRecords ctx [ "WHERE component_id = @0" ] [ sr.Id ]
+                     |> List.map (fun svr ->
+                         ({ Id = EntityId.Deserialize svr.Id
+                            Version = svr.Version }
+                         : EntityVersionListingItem)) }
+                : EntitiesListingItem)) }

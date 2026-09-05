@@ -53,6 +53,23 @@ module Scenes =
 
                 Ok eId
 
+
+        let addComponent
+            (ctx: SqliteContext)
+            (sceneObjectId: EntityId)
+            (componentVersionId: EntityId)
+            (serializedData: string option)
+
+            =
+
+            // TODO add error handling etc
+            ({ Id = EntityId.Create().Serialize()
+               SceneObjectId = sceneObjectId.Serialize()
+               ComponentVersionId = componentVersionId.Serialize()
+               OverrideComponentData = serializedData }
+            : Parameters.NewSceneObjectComponent)
+            |> Operations.insertSceneObjectComponent ctx
+
         let buildTransform (sor: Records.SceneObject) =
             let mutable t = Transform.Default
 
@@ -70,6 +87,34 @@ module Scenes =
 
             t
 
+        let getComponents (ctx: SqliteContext) (sceneObjectId: EntityId) =
+            Operations.selectSceneObjectComponentRecords ctx [ "WHERE scene_object_id = @0" ] [ sceneObjectId.Serialize() ]
+            |> List.map (fun ocr ->
+                let cId = EntityId.Deserialize ocr.ComponentVersionId
+
+                match Components.getVersion ctx cId with
+                | Error errorValue -> failwith "todo"
+                | Ok resultValue ->
+                    let comp =
+                        match resultValue with
+                        | Components.BuildComponentResults.Success comp -> comp
+                        | Components.BuildComponentResults.Partial(comp, errors) ->
+                            // TODO report on errors.
+
+                            comp
+
+                    ({ Id = cId
+                       OverrideComponentData = ocr.OverrideComponentData
+                       Component = comp
+                       Metadata =
+                         Operations.selectSceneObjectComponentMetadataItemRecords
+                             ctx
+                             [ "WHERE scene_object_component_id = @0" ]
+                             [ ocr.Id ]
+                         |> List.map (fun r -> r.ItemKey, r.ItemValue)
+                         |> Map.ofList }
+                    : SceneObjectComponent))
+        
         let build (ctx: SqliteContext) (sor: Records.SceneObject) (children: ResizeArray<SceneObject>) =
             let eId = EntityId.Deserialize sor.Id
 
@@ -77,36 +122,11 @@ module Scenes =
                Name = sor.Name
                Children = children
                Transform = buildTransform sor
-               Components =
-                 Operations.selectSceneObjectComponentRecords ctx [ "WHERE scene_object_id = @0" ] [ sor.Id ]
-                 |> List.map (fun ocr ->
-                     let cId = EntityId.Deserialize ocr.Id
-
-                     match Components.getVersion ctx cId with
-                     | Error errorValue -> failwith "todo"
-                     | Ok resultValue ->
-                         let comp =
-                             match resultValue with
-                             | Components.BuildComponentResults.Success comp -> comp
-                             | Components.BuildComponentResults.Partial(comp, errors) ->
-                                 // TODO report on errors.
-
-                                 comp
-
-                         ({ Id = cId
-                            OverrideComponentData = ocr.OverrideComponentData
-                            Component = comp
-                            Metadata =
-                              Operations.selectSceneObjectComponentMetadataItemRecords
-                                  ctx
-                                  [ "WHERE scene_object_component_id = @0" ]
-                                  [ ocr.Id ]
-                              |> List.map (fun r -> r.ItemKey, r.ItemValue)
-                              |> Map.ofList }
-                         : SceneObjectComponent))
+               Components = getComponents ctx eId
                  |> ResizeArray
                Metadata = [] |> Map.ofList }
             : SceneObject)
+
 
         let updateTransform (ctx: SqliteContext) (sceneObjectId: EntityId) (transform: Transform) =
             ctx.ExecuteVerbatimNonQuery(
@@ -138,6 +158,7 @@ module Scenes =
                   transform.Scale.Z ]
             )
             |> ignore
+
 
 
     module Internal =
@@ -192,8 +213,6 @@ module Scenes =
                Objects = topLevelObjects |> Seq.map (traverse) |> ResizeArray }
             : Scene)
 
-
-
     [<RequireQualifiedAccess>]
     type GetSceneFailure = Generic of Generic.GenericFailure
 
@@ -229,7 +248,7 @@ module Scenes =
           Objects = ResizeArray<SceneObject>() }
 
     let getListings (ctx: SqliteContext) =
-        { Scenes =
+        { Entities =
             Operations.selectSceneRecords ctx [] []
             |> List.map (fun sr ->
                 ({ Id = EntityId.Deserialize sr.Id
@@ -239,8 +258,8 @@ module Scenes =
                      |> List.map (fun svr ->
                          ({ Id = EntityId.Deserialize svr.Id
                             Version = svr.Version }
-                         : SceneVersionListingItem)) }
-                : SceneListingItem)) }
+                         : EntityVersionListingItem)) }
+                : EntitiesListingItem)) }
 
     [<RequireQualifiedAccess>]
     type GetVersionFailure = SceneVersionNotFound of EntityId
