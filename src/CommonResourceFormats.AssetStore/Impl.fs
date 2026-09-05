@@ -52,3 +52,7 @@ type AssetStoreContext(path: string) as this =
     member _.AddNewComponent(comp: NewComponent) = Operations.Components.addNew ctx comp
     
     member _.GetComponentListings() = Operations.Components.getListings ctx
+    
+    member _.GetComponentVersion(componentVersionId: EntityId) =
+        Operations.Components.getVersion ctx componentVersionId
+    

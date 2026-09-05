@@ -45,4 +45,4 @@ module Generic =
                 [ while r.Read() do
                       r.GetString(0), r.GetString(1) ]
         )
-        |> Map.ofList
+        |> EntityMetadata.Create

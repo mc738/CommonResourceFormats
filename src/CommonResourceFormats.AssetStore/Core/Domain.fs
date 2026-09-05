@@ -21,6 +21,21 @@ type EntityId =
         match eid with
         | Guid guid -> guid.ToString(Cfg.serializationFormation)
 
+
+type EntityMetadata =
+    { Raw: Map<string, string> }
+
+    static member Empty = { Raw = Map.empty }
+
+    static member Create(kvs: (string * string) seq) = { Raw = kvs |> Map.ofSeq }
+
+    static member FromMap(map: Map<string, string>) = { Raw = map }
+
+    member emd.TryGet(key: string) = emd.Raw.TryFind key
+
+    member emd.TryGet(ns: string, key: string) = emd.Raw.TryFind $"{ns}:{key}"
+
+
 [<RequireQualifiedAccess>]
 type Version =
     | Latest
@@ -60,8 +75,8 @@ type Asset =
       AssetType: string
       Version: int
       IsPrototype: bool
-      Metadata: Map<string, string>
-      VersionMetadata: Map<string, string>
+      Metadata: EntityMetadata
+      VersionMetadata: EntityMetadata
       Path: EntityPath
       Resources: AssetResource ResizeArray }
 
@@ -71,7 +86,7 @@ and AssetResource =
       Description: string
       FileType: string
       Hash: string
-      Metadata: Map<string, string> }
+      Metadata: EntityMetadata }
 
 
 type NewAsset =
@@ -80,15 +95,15 @@ type NewAsset =
       Name: string
       AssetType: string
       IsPrototype: bool
-      Metadata: Map<string, string>
-      VersionMetadata: Map<string, string>
+      Metadata: EntityMetadata
+      VersionMetadata: EntityMetadata
       Path: EntityPath }
 
 
 type ComponentAsset =
     { Id: EntityId
       Asset: Asset
-      Metadata: Map<string, string> }
+      Metadata: EntityMetadata }
 
 type Component =
     { Id: EntityId
@@ -97,8 +112,8 @@ type Component =
       Name: string
       ComponentType: string
 
-      Metadata: Map<string, string>
-      VersionMetadata: Map<string, string>
+      Metadata: EntityMetadata
+      VersionMetadata: EntityMetadata
 
       SerializedData: string
 
@@ -109,8 +124,8 @@ type NewComponent =
       VersionId: EntityId
       Name: string
       ComponentType: string
-      Metadata: Map<string, string>
-      VersionMetadata: Map<string, string>
+      Metadata: EntityMetadata
+      VersionMetadata: EntityMetadata
       SerializedData: string }
 
 type SceneObject =
@@ -119,7 +134,7 @@ type SceneObject =
       Children: SceneObject ResizeArray
       Components: SceneObjectComponent ResizeArray
       Transform: Transform
-      Metadata: Map<string, string> }
+      Metadata: EntityMetadata }
 
 and SceneObjectComponent =
     {
@@ -131,7 +146,7 @@ and SceneObjectComponent =
         /// </summary>
         OverrideComponentData: string option
         Component: Component
-        Metadata: Map<string, string>
+        Metadata: EntityMetadata
     }
 
 type Scene =

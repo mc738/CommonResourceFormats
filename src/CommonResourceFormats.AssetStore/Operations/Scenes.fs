@@ -112,7 +112,7 @@ module Scenes =
                              [ "WHERE scene_object_component_id = @0" ]
                              [ ocr.Id ]
                          |> List.map (fun r -> r.ItemKey, r.ItemValue)
-                         |> Map.ofList }
+                         |> EntityMetadata.Create }
                     : SceneObjectComponent))
         
         let build (ctx: SqliteContext) (sor: Records.SceneObject) (children: ResizeArray<SceneObject>) =
@@ -124,7 +124,7 @@ module Scenes =
                Transform = buildTransform sor
                Components = getComponents ctx eId
                  |> ResizeArray
-               Metadata = [] |> Map.ofList }
+               Metadata = EntityMetadata.Empty }
             : SceneObject)
 
 
