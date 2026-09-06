@@ -25,18 +25,16 @@ type AssetStoreContext(path: string) as this =
         (sceneVersionId: EntityId, parentId: EntityId option, name: string, transform: Types.Transform)
         =
         Operations.Scenes.Objects.add ctx sceneVersionId parentId name transform
-        
-     member _.AddSceneObjectComponent
-        (sceneObjectId: EntityId, componentVersionId: EntityId, data: string option)
-        =
+
+    member _.AddSceneObjectComponent(sceneObjectId: EntityId, componentVersionId: EntityId, data: string option) =
         Operations.Scenes.Objects.addComponent ctx sceneObjectId componentVersionId data
 
     member _.GetSceneListings() = Operations.Scenes.getListings ctx
 
     member _.GetSceneVersion(sceneVersionId: EntityId) =
         Operations.Scenes.getVersion ctx sceneVersionId
-        
-     member _.GetSceneObjectComponents(sceneObjectId: EntityId) =
+
+    member _.GetSceneObjectComponents(sceneObjectId: EntityId) =
         Operations.Scenes.Objects.getComponents ctx sceneObjectId
 
     member _.UpdateSceneObjectTransform(sceneObjectId: EntityId, transform: Transform) =
@@ -48,11 +46,19 @@ type AssetStoreContext(path: string) as this =
 
     member _.GetAssetVersion(assetVersionId: EntityId) =
         Operations.Assets.getVersion ctx assetVersionId
-    
+
     member _.AddNewComponent(comp: NewComponent) = Operations.Components.addNew ctx comp
-    
+
     member _.GetComponentListings() = Operations.Components.getListings ctx
-    
+
     member _.GetComponentVersion(componentVersionId: EntityId) =
         Operations.Components.getVersion ctx componentVersionId
-    
+
+    member _.UpsertComponentMetadataItem(componentId: EntityId, key: EntityKey, value: string) =
+        Operations.Components.upsertMetadataItem ctx componentId key value
+
+    member _.UpsertComponentVersionMetadataItem(componentVersionId: EntityId, key: EntityKey, value: string) =
+        Operations.Components.upsertVersionMetadataItem ctx componentVersionId key value |> ignore
+
+    member _.AddComponentAsset(componentAsset: NewComponentAsset) =
+        Operations.Components.addComponentAsset ctx componentAsset

@@ -67,14 +67,15 @@ module Assets =
 
         let buildModel (ctx: SqliteContext) (er: Records.Asset) (evr: Records.AssetVersion) =
             let entityId = EntityId.Deserialize er.Id
+            let entityVersionId = EntityId.Deserialize evr.Id
 
             { Id = entityId
-              VersionId = EntityId.Deserialize evr.Id
+              VersionId = entityVersionId
               Version = evr.Version
-              AssetType = er.AssetType
+              AssetType = er.AssetType |> EntityKey.Deserialize
               IsPrototype = evr.IsPrototype
               Metadata = getMetadata ctx entityId
-              VersionMetadata = getVersionMetadata ctx entityId
+              VersionMetadata = getVersionMetadata ctx entityVersionId
               Path = evr.AssetPath |> EntityPath.Deserialize
               Resources =
                 Operations.selectAssetVersionResourceRecords ctx [ "WHERE asset_version_id = @0" ] [ evr.Id ]
@@ -98,7 +99,7 @@ module Assets =
 
         ({ Id = asset.Id.Serialize()
            Name = asset.Name
-           AssetType = asset.AssetType
+           AssetType = asset.AssetType.Serialize()
            CreatedOn = createdOn }
         : Parameters.NewAsset)
         |> Operations.insertAsset ctx

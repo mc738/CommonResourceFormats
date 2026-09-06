@@ -46,3 +46,30 @@ module Generic =
                       r.GetString(0), r.GetString(1) ]
         )
         |> EntityMetadata.Create
+
+    let upsertMetadataItem
+        (ctx: SqliteContext)
+        (entityTypeName: string)
+        (entityId: EntityId)
+        (key: EntityKey)
+        (value: string)
+        =
+        ctx.Bespoke(
+            $"SELECT item_key, item_value FROM {entityTypeName}_metadata WHERE {entityTypeName}_id = @0 AND item_key = @1",
+            [ entityId.Serialize(); key.Serialize() ],
+            fun r ->
+                [ while r.Read() do
+                      r.GetString(0), r.GetString(1) ]
+        )
+        |> List.tryHead
+        |> function
+            | Some v ->
+                ctx.ExecuteVerbatimNonQueryAnon(
+                    $"UPDATE {entityTypeName}_metadata SET item_value = @0 WHERE item_key = @1",
+                    [ value; key.Serialize() ]
+                )
+            | None ->
+                ctx.ExecuteVerbatimNonQueryAnon(
+                    $"INSERT INTO {entityTypeName}_metadata VALUES (@0, @1, @2)",
+                    [ entityId.Serialize(); key.Serialize(); value ]
+                )

@@ -84,17 +84,18 @@ module Components =
 
         let buildModel (ctx: SqliteContext) (er: Records.Component) (evr: Records.ComponentVersion) =
             let entityId = EntityId.Deserialize er.Id
+            let entityVersionId = EntityId.Deserialize evr.Id
 
             let errors = ResizeArray<BuildComponentError>()
 
             let comp =
                 { Id = entityId
-                  VersionId = EntityId.Deserialize evr.Id
+                  VersionId = entityVersionId
                   Version = evr.Version
                   Name = er.Name
-                  ComponentType = er.ComponentType
+                  ComponentType = er.ComponentType |> EntityKey.Deserialize
                   Metadata = getMetadata ctx entityId
-                  VersionMetadata = getVersionMetadata ctx entityId
+                  VersionMetadata = getVersionMetadata ctx entityVersionId
                   SerializedData = evr.ComponentData
                   Assets =
                     Operations.selectComponentAssetRecords ctx [ "WHERE component_version_id = @0" ] [ evr.Id ]
@@ -191,7 +192,7 @@ module Components =
 
         ({ Id = comp.Id.Serialize()
            Name = comp.Name
-           ComponentType = comp.ComponentType }
+           ComponentType = comp.ComponentType.Serialize() }
         : Parameters.NewComponent)
         |> Operations.insertComponent ctx
 
@@ -276,6 +277,19 @@ module Components =
                 [ value; componentVersionId.Serialize(); key ]
             )
             |> ignore
+
+    let upsertMetadataItem (ctx: SqliteContext) (componentId: EntityId) (key: EntityKey) (value: string) =
+        Generic.upsertMetadataItem ctx Internal.entityTypeName componentId key value
+
+    let upsertVersionMetadataItem (ctx: SqliteContext) (componentId: EntityId) (key: EntityKey) (value: string) =
+        Generic.upsertMetadataItem ctx $"{Internal.entityTypeName}_version" componentId key value
+
+    let addComponentAsset (ctx: SqliteContext) (componentAsset: NewComponentAsset) =
+        ({ Id = componentAsset.Id.Serialize()
+           ComponentVersionId = componentAsset.ComponentVersionId.Serialize()
+           AssetVersionId = componentAsset.AssetVersionId.Serialize() }
+        : Parameters.NewComponentAsset)
+        |> Operations.insertComponentAsset ctx
 
     [<RequireQualifiedAccess>]
     type GetVersionFailure = VersionNotFound of EntityId
