@@ -88,7 +88,10 @@ module Scenes =
             t
 
         let getComponents (ctx: SqliteContext) (sceneObjectId: EntityId) =
-            Operations.selectSceneObjectComponentRecords ctx [ "WHERE scene_object_id = @0" ] [ sceneObjectId.Serialize() ]
+            Operations.selectSceneObjectComponentRecords
+                ctx
+                [ "WHERE scene_object_id = @0" ]
+                [ sceneObjectId.Serialize() ]
             |> List.map (fun ocr ->
                 let cId = EntityId.Deserialize ocr.ComponentVersionId
 
@@ -114,7 +117,7 @@ module Scenes =
                          |> List.map (fun r -> r.ItemKey, r.ItemValue)
                          |> EntityMetadata.Create }
                     : SceneObjectComponent))
-        
+
         let build (ctx: SqliteContext) (sor: Records.SceneObject) (children: ResizeArray<SceneObject>) =
             let eId = EntityId.Deserialize sor.Id
 
@@ -122,14 +125,13 @@ module Scenes =
                Name = sor.Name
                Children = children
                Transform = buildTransform sor
-               Components = getComponents ctx eId
-                 |> ResizeArray
+               Components = getComponents ctx eId |> ResizeArray
                Metadata = EntityMetadata.Empty }
             : SceneObject)
 
 
         let updateTransform (ctx: SqliteContext) (sceneObjectId: EntityId) (transform: Transform) =
-            ctx.ExecuteVerbatimNonQuery(
+            ctx.ExecuteVerbatimNonQueryAnon(
                 """
                 UPDATE scene_objects 
                 SET
@@ -146,16 +148,17 @@ module Scenes =
                 WHERE 
                     id = @10
             """,
-                [ transform.Position.X
-                  transform.Position.Y
-                  transform.Position.Z
-                  transform.Rotation.X
-                  transform.Rotation.Y
-                  transform.Rotation.Z
-                  transform.Rotation.W
-                  transform.Scale.X
-                  transform.Scale.Y
-                  transform.Scale.Z ]
+                [ box transform.Position.X
+                  box transform.Position.Y
+                  box transform.Position.Z
+                  box transform.Rotation.X
+                  box transform.Rotation.Y
+                  box transform.Rotation.Z
+                  box transform.Rotation.W
+                  box transform.Scale.X
+                  box transform.Scale.Y
+                  box transform.Scale.Z
+                  box (sceneObjectId.Serialize()) ]
             )
             |> ignore
 
